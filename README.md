@@ -19,7 +19,7 @@ PROJECT=HORD_FUND
 - `npx hardhat compile` (Compiles the entire project, building all artifacts)
 
 #### Deploy code 
-- `npx hardhat node` (Starts a JSON-RPC server on top of Hardhat Networ)
+- `npx hardhat node` (Starts a JSON-RPC server on top of Hardhat Network)
 - `npx hardhat run --network localhost scripts/{desired_deployment_script}`
 
 #### Flatten contracts
