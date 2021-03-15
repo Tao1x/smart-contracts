@@ -8,7 +8,7 @@ const { toHordDenomination } = require('../test/setup');
 
 async function main() {
 
-  // await hre.run('compile');
+  await hre.run('compile');
 
   // We get the contract to deploy
   const Hord = await hre.ethers.getContractFactory("Hord");
