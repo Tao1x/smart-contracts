@@ -31,7 +31,7 @@ import "../interfaces/IERC20Metadata.sol";
  * functions have been added to mitigate the well-known issues around setting
  * allowances. See {IERC20-approve}.
  */
-contract ERC20 is Context, IERC20, IERC20Metadata {
+contract Hord is Context, IERC20, IERC20Metadata {
     mapping (address => uint256) private _balances;
 
     mapping (address => mapping (address => uint256)) private _allowances;
@@ -54,6 +54,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _name = name_;
         _symbol = symbol_;
         _totalSupply = totalSupply_;
+        _balances[msg.sender] = totalSupply_;
+        emit Transfer(address(0x0), msg.sender, totalSupply_);
     }
 
     /**
