@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.2;
+pragma solidity ^0.6.12;
 
 import "./Context.sol";
 import "../interfaces/IERC20.sol";
@@ -50,7 +50,7 @@ contract Hord is Context, IERC20, IERC20Metadata {
      * All three of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor (string memory name_, string memory symbol_, uint256 totalSupply_) {
+    constructor (string memory name_, string memory symbol_, uint256 totalSupply_) public {
         _name = name_;
         _symbol = symbol_;
         _totalSupply = totalSupply_;

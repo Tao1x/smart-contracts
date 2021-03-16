@@ -1,7 +1,6 @@
-pragma solidity ^0.8.2;
+pragma solidity ^0.6.12;
 
-import "@openzeppelin/upgrades-core/contracts/Initializable.sol";
-
+import "@openzeppelin/contracts/proxy/Initializable.sol";
 /**
  * LongTermTokenPool contract.
  * @author Nikola Madjarevic
