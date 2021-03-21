@@ -21,7 +21,7 @@ contract HordCongressMembersRegistry {
     address public hordCongress;
 
     //The minimum number of voting members that must be in attendance
-    uint256 minimumQuorum;
+    uint256 minimalQuorum;
 
     // Mapping to check if the member is belonging to congress
     mapping (address => bool) isMemberInCongress;
@@ -71,7 +71,7 @@ contract HordCongressMembersRegistry {
     onlyHordCongress
     {
         require(newMinimumQuorum > 0);
-        minimumQuorum = newMinimumQuorum;
+        minimalQuorum = newMinimumQuorum;
     }
 
     /**
@@ -102,7 +102,7 @@ contract HordCongressMembersRegistry {
         //Require that this member is not already a member of congress
         require(isMemberInCongress[targetMember] == false);
         // Update minimum quorum
-        minimumQuorum = allMembers.length.sub(1);
+        minimalQuorum = allMembers.length.sub(1);
         // Update basic member information
         address2Member[targetMember] = Member({
             memberAddress: targetMember,
@@ -161,7 +161,7 @@ contract HordCongressMembersRegistry {
         });
 
         //Reduce 1 member from quorum
-        minimumQuorum = minimumQuorum.sub(1);
+        minimalQuorum = minimalQuorum.sub(1);
     }
 
     /**
@@ -213,11 +213,11 @@ contract HordCongressMembersRegistry {
         );
     }
 
-    function getMinimumQuorum()
+    function getMinimalQuorum()
     public
     view
     returns (uint256)
     {
-        return minimumQuorum;
+        return minimalQuorum;
     }
 }
