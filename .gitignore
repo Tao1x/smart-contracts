@@ -7,4 +7,4 @@ artifacts
 .idea
 .env
 yarn.lock
-deployments/
+deployments/contract*
