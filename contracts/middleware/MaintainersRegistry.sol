@@ -24,7 +24,6 @@ contract MaintainersRegistry is Initializable {
      * @param   _maintainers is the array of initial maintainer addresses
      */
     function initialize(address [] memory _maintainers) public initializer {
-
         for(uint i = 0; i < _maintainers.length; i++) {
             address _maintainer = _maintainers[i];
             maintainers.push(_maintainer);
