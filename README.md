@@ -14,6 +14,9 @@ USERNAME=HORD
 PROJECT=HORD_FUND
 ```
 
+#### Create file for local and public deployments
+- `mkdir deployments`
+
 #### Compile code
 - `npx hardhat clean` (Clears the cache and deletes all artifacts)
 - `npx hardhat compile` (Compiles the entire project, building all artifacts)
