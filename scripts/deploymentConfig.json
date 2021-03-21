@@ -1,0 +1,11 @@
+{
+  "hordTokenName" : "HORD token",
+  "hordTokenSymbol" : "HORD",
+  "hordTotalSupply" : 320000000,
+  "initialCongressMembers": [
+    "0x6567D655953f38d29f57B1ebd55CA6Cae4dAa12B"
+  ],
+  "initialCongressMembersNames": [
+    "Nikola"
+  ]
+}
