@@ -49,6 +49,24 @@ async function currentTime(provider) {
     return parseInt(block.timestamp, 16)
 }
 
+function hexify(names) {
+    let resp = [];
+
+    for(const name of names) {
+        let hexed = web3.utils.toHex(name);
+        let prefix = '0x';
+        let hexValue = hexed.slice(2);
+
+        while(hexValue.length < 64) {
+            hexValue = '0' + hexValue
+        }
+
+        resp.push(prefix + hexValue);
+    }
+
+    return resp;
+}
+
 const decimals = "1000000000000000000"
 
 function toHordDenomination (x) {
@@ -65,5 +83,6 @@ module.exports = {
     awaitTx,
     waitForSomeTime,
     currentTime,
-    toHordDenomination
+    toHordDenomination,
+    hexify
 }
