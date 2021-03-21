@@ -15,7 +15,7 @@ const transferAmountMinusOne = transferAmount.sub(unitTokenAmount)
 let hordToken, owner, ownerAddr, anotherAccount, anotherAccountAddr, recipient, recipientAddr, r
 
 async function setupContractAndAccounts () {
-  accounts = await ethers.getSigners()
+  let accounts = await ethers.getSigners()
   owner = accounts[0]
   ownerAddr = await owner.getAddress()
   anotherAccount = accounts[8]
