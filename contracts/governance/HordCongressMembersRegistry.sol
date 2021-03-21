@@ -54,12 +54,14 @@ contract HordCongressMembersRegistry {
     public
     {
         uint length = initialCongressMembers.length;
+
         for(uint i=0; i<length; i++) {
             addMemberInternal(
                 initialCongressMembers[i],
                 initialCongressMemberNames[i]
             );
         }
+
         hordCongress = _hordCongress;
     }
 
@@ -101,8 +103,6 @@ contract HordCongressMembersRegistry {
     {
         //Require that this member is not already a member of congress
         require(isMemberInCongress[targetMember] == false);
-        // Update minimum quorum
-        minimalQuorum = allMembers.length.sub(1);
         // Update basic member information
         address2Member[targetMember] = Member({
             memberAddress: targetMember,
@@ -111,6 +111,8 @@ contract HordCongressMembersRegistry {
         });
         // Add member to list of all members
         allMembers.push(targetMember);
+        // Update minimum quorum
+        minimalQuorum = allMembers.length.sub(1);
         // Mark that user is member in congress
         isMemberInCongress[targetMember] = true;
         // Fire an event
