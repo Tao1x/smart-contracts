@@ -6,7 +6,10 @@ const config = require('../../deployments/deploymentConfig.json');
 const { ethers, expect, isEthException, awaitTx, toHordDenomination, hexify } = require('../setup')
 
 let hordCongress, hordCongressMembersRegistry, hordToken, accounts, owner, ownerAddr, anotherAccount, anotherAccountAddr, r
-let initialMembers, initialNames, ownerName
+let nonCongressAcc, nonCongressAccAddr
+let initialMembers, initialNames
+let tokensToTransfer = 1000;
+let targets, values, signatures, calldatas, description, proposalId, numberOfProposals
 
 async function setupContractAndAccounts () {
     accounts = await ethers.getSigners()
@@ -14,6 +17,8 @@ async function setupContractAndAccounts () {
     ownerAddr = await owner.getAddress()
     anotherAccount = accounts[8]
     anotherAccountAddr = await anotherAccount.getAddress()
+    nonCongressAcc = accounts[9]
+    nonCongressAccAddr = await nonCongressAcc.getAddress()
 
     const HordCongress = await hre.ethers.getContractFactory("HordCongress");
     hordCongress = await HordCongress.deploy();
@@ -75,4 +80,45 @@ describe('Governance', () => {
            expect(congressMembersRegistry.toLowerCase()).to.be.equal(hordCongressMembersRegistry.address.toLowerCase())
        })
     });
+
+    describe('HordCongress::propose', async() => {
+
+        it('should setup proposal information', async() => {
+            targets = [hordToken.address];
+            values = ["0"];
+            signatures = ["transfer(address,uint256)"];
+            calldatas = [encodeParameters(['address','uint256'], [anotherAccountAddr, toHordDenomination(tokensToTransfer)])];
+            description = `Transfer ${tokensToTransfer} tokens from HordCongress to ${anotherAccountAddr}`;
+        })
+
+        describe('Should NOT be able to propose from non-congress member', async() => {
+            it('should fail on trying to propose', async() => {
+                expect(
+                    await isEthException(hordCongress.connect(nonCongressAcc).propose(targets, values, signatures, calldatas, description))
+                ).to.be.true
+            })
+        });
+
+        describe('Should BE able to propose from congress member', async() => {
+
+            it(`should create a proposal to transfer ${tokensToTransfer} tokens from Congress`, async() => {
+                r = await awaitTx(hordCongress.propose(targets, values, signatures, calldatas, description));
+            });
+
+            it('should check ProposalCreated event', async() => {
+                proposalId = parseInt(r.events[0].args.id);
+                expect(r.events.length).to.equal(1)
+                expect(r.events[0].event).to.equal('ProposalCreated')
+                expect(r.events[0].args.proposer).to.equal(ownerAddr)
+                expect(r.events[0].args.description).to.equal(description)
+            });
+
+            it('should check proposal id is properly incrementing', async() => {
+                numberOfProposals = await hordCongress.proposalCount();
+                expect(proposalId).to.be.equal(numberOfProposals);
+            });
+        });
+    })
+
+
 });
