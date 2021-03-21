@@ -1,6 +1,6 @@
 const hre = require("hardhat");
 const { hexify, toHordDenomination } = require('../test/setup');
-const { getSavedContractAddresses, saveContractAddress } = require('./utils')
+const { getSavedContractAddresses, saveContractAddress, getSavedContractBytecodes, saveContractBytecode } = require('./utils')
 const config = require('./deploymentConfig.json');
 
 async function main() {
@@ -11,6 +11,7 @@ async function main() {
   await hordCongress.deployed();
   console.log("HordCongress contract deployed to:", hordCongress.address);
   saveContractAddress(hre.network.name, 'hordCongress', hordCongress.address);
+  saveContractBytecode(hre.network.name,'hordCongress', (await hre.artifacts.readArtifact("HordCongress")).bytecode);
 
   const HordCongressMembersRegistry = await hre.ethers.getContractFactory("HordCongressMembersRegistry");
   const hordCongressMembersRegistry = await HordCongressMembersRegistry.deploy(
@@ -21,8 +22,9 @@ async function main() {
   await hordCongressMembersRegistry.deployed();
   console.log("HordCongressMembersRegistry contract deployed to:", hordCongressMembersRegistry.address);
   saveContractAddress(hre.network.name, 'hordCongressMembersRegistry', hordCongressMembersRegistry.address);
+  saveContractBytecode(hre.network.name,'hordCongressMembersRegistry', (await hre.artifacts.readArtifact("HordCongressMembersRegistry")).bytecode);
 
-  // We get the contract to deploy
+
   const Hord = await hre.ethers.getContractFactory("Hord");
   const hord = await Hord.deploy(
       config.hordTokenName,
@@ -33,6 +35,8 @@ async function main() {
   await hord.deployed();
   console.log("Hord token deployed to:", hord.address);
   saveContractAddress(hre.network.name, 'hordToken', hord.address);
+  saveContractBytecode(hre.network.name,'hordToken', (await hre.artifacts.readArtifact("Hord")).bytecode);
+
 
   await hordCongress.setMembersRegistry(hordCongressMembersRegistry.address);
   console.log('HordCongress.setMembersRegistry(',hordCongressMembersRegistry.address,') set successfully.');
