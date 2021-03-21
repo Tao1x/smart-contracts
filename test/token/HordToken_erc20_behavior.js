@@ -1,5 +1,5 @@
-const { ethers, expect, isEthException, awaitTx, toHordDenomination } = require('./setup')
-const config = require('../deployments/deploymentConfig.json');
+const { ethers, expect, isEthException, awaitTx, toHordDenomination } = require('../setup')
+const config = require('../../deployments/deploymentConfig.json');
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 const INITIAL_SUPPLY = toHordDenomination(config.hordTotalSupply)
