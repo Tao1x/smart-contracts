@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 const { hexify, toHordDenomination } = require('../test/setup');
 const { getSavedContractAddresses, saveContractAddress, getSavedContractBytecodes, saveContractBytecode } = require('./utils')
-const config = require('./deploymentConfig.json');
+const config = require('../deployments/deploymentConfig.json');
 
 async function main() {
   await hre.run('compile');
