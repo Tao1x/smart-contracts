@@ -1,10 +1,14 @@
 const fs = require('fs')
 const path = require('path')
 
-function getSavedContractAddresses() {
+function getSavedContractAddresses(env) {
+    if(!env) {
+        env = 'local'
+    }
+
     let json
     try {
-        json = fs.readFileSync(path.join(__dirname, '../contract-addresses.json'))
+        json = fs.readFileSync(path.join(__dirname, `../contract-addresses-${env}.json`))
     } catch (err) {
         json = '{}'
     }
@@ -12,11 +16,14 @@ function getSavedContractAddresses() {
     return addrs
 }
 
-function saveContractAddress(network, contract, address) {
+function saveContractAddress(network, contract, address, env) {
+    if(!env) {
+        env = 'local'
+    }
     const addrs = getSavedContractAddresses()
     addrs[network] = addrs[network] || {}
     addrs[network][contract] = address
-    fs.writeFileSync(path.join(__dirname, '../contract-addresses.json'), JSON.stringify(addrs, null, '    '))
+    fs.writeFileSync(path.join(__dirname, `../contract-addresses-${env}.json`), JSON.stringify(addrs, null, '    '))
 }
 
 module.exports = {
