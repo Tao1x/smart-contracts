@@ -67,9 +67,6 @@ contract HordCongress {
     /// @notice The official record of all proposals ever proposed
     mapping (uint => Proposal) public proposals;
 
-    /// @notice The latest proposal for each proposer
-    mapping (address => uint) public latestProposalIds;
-
     /// @notice An event emitted when a new proposal is created
     event ProposalCreated(uint id, address proposer, address[] targets, uint[] values, string[] signatures, bytes[] calldatas, string description);
 
