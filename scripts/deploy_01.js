@@ -25,8 +25,8 @@ async function main() {
   saveContractBytecode(hre.network.name,'hordCongressMembersRegistry', (await hre.artifacts.readArtifact("HordCongressMembersRegistry")).bytecode);
 
 
-  const Hord = await hre.ethers.getContractFactory("Hord");
-  const hord = await Hord.deploy(
+  const HordToken = await hre.ethers.getContractFactory("HordToken");
+  const hord = await HordToken.deploy(
       config.hordTokenName,
       config.hordTokenSymbol,
       toHordDenomination(config.hordTotalSupply.toString()),
@@ -35,7 +35,7 @@ async function main() {
   await hord.deployed();
   console.log("Hord token deployed to:", hord.address);
   saveContractAddress(hre.network.name, 'hordToken', hord.address);
-  saveContractBytecode(hre.network.name,'hordToken', (await hre.artifacts.readArtifact("Hord")).bytecode);
+  saveContractBytecode(hre.network.name,'hordToken', (await hre.artifacts.readArtifact("HordToken")).bytecode);
 
 
   await hordCongress.setMembersRegistry(hordCongressMembersRegistry.address);

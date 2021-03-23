@@ -37,7 +37,7 @@ async function setupContractAndAccounts () {
     await hordCongressMembersRegistry.deployed();
     await hordCongress.setMembersRegistry(hordCongressMembersRegistry.address);
 
-    const Hord = await hre.ethers.getContractFactory("Hord");
+    const Hord = await hre.ethers.getContractFactory("HordToken");
     hordToken = await Hord.deploy(
         config.hordTokenName,
         config.hordTokenSymbol,

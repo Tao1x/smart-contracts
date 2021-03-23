@@ -23,7 +23,7 @@ async function setupContractAndAccounts () {
   recipient = accounts[9]
   recipientAddr = await recipient.getAddress()
 
-  const Hord = await hre.ethers.getContractFactory("Hord");
+  const Hord = await hre.ethers.getContractFactory("HordToken");
   hordToken = await Hord.deploy(
       config.hordTokenName,
       config.hordTokenSymbol,

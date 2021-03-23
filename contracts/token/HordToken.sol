@@ -31,7 +31,7 @@ import "../interfaces/IERC20Metadata.sol";
  * functions have been added to mitigate the well-known issues around setting
  * allowances. See {IERC20-approve}.
  */
-contract Hord is Context, IERC20, IERC20Metadata {
+contract HordToken is Context, IERC20, IERC20Metadata {
     mapping (address => uint256) private _balances;
 
     mapping (address => mapping (address => uint256)) private _allowances;
