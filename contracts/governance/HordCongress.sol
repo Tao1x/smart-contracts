@@ -157,6 +157,7 @@ contract HordCongress {
         uint proposalId
     )
     public
+    onlyMember
     payable
     {
         // load the proposal
@@ -191,7 +192,7 @@ contract HordCongress {
         emit ProposalExecuted(proposalId);
     }
 
-    function cancel(uint proposalId) public {
+    function cancel(uint proposalId) public onlyMember {
         Proposal storage proposal = proposals[proposalId];
         // Require that proposal is not previously executed neither cancelled
         require(proposal.executed == false && proposal.canceled == false);
@@ -206,7 +207,7 @@ contract HordCongress {
     function _castVote(address voter, uint proposalId, bool support) internal {
         Proposal storage proposal = proposals[proposalId];
         Receipt storage receipt = proposal.receipts[voter];
-        require(receipt.hasVoted == false, "GovernorAlpha::_castVote: voter already voted");
+        require(receipt.hasVoted == false, "HordCongress::_castVote: voter already voted");
 
         if (support) {
             proposal.forVotes = add256(proposal.forVotes, 1);
