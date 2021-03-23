@@ -20,9 +20,12 @@ PROJECT=HORD_FUND
 
 #### Deploy code 
 - `npx hardhat node` (Starts a JSON-RPC server on top of Hardhat Network)
-- `npx hardhat run --network localhost scripts/{desired_deployment_script}`
+- `npx hardhat run --network {network} scripts/{desired_deployment_script}`
 
 #### Flatten contracts
 - `npx hardhat flatten` (Flattens and prints contracts and their dependencies)
 
+
+#### Deployed addresses and bytecodes
+All deployed addresses and bytecodes can be found inside `deployments/` folder.
 
