@@ -119,7 +119,6 @@ contract HordCongress {
         );
 
         require(targets.length != 0, "HordCongress::propose: must provide actions");
-        require(membersRegistry.isMember(msg.sender) == true, "HordCongress::propose: only members can submit proposal");
 
         proposalCount++;
 
