@@ -148,6 +148,7 @@ contract HordCongress {
         bool support
     )
     public
+    onlyMember
     {
         return _castVote(msg.sender, proposalId, support);
     }
