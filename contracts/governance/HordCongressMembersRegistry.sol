@@ -34,7 +34,6 @@ contract HordCongressMembersRegistry {
 
 
     struct Member {
-        address memberAddress;
         bytes32 name;
         uint memberSince;
     }
@@ -106,7 +105,6 @@ contract HordCongressMembersRegistry {
         require(isMemberInCongress[targetMember] == false);
         // Update basic member information
         address2Member[targetMember] = Member({
-            memberAddress: targetMember,
             memberSince: block.timestamp,
             name: memberName
         });
@@ -158,7 +156,6 @@ contract HordCongressMembersRegistry {
 
         //Remove his state to empty member
         address2Member[targetMember] = Member({
-            memberAddress: address(0),
             memberSince: block.timestamp,
             name: "0x0"
         });
@@ -206,14 +203,16 @@ contract HordCongressMembersRegistry {
     }
 
     /// Get member information
-    function getMemberInfo()
+    function getMemberInfo(
+        address _member
+    )
     public
     view
     returns (address, bytes32, uint)
     {
-        Member memory member = address2Member[msg.sender];
+        Member memory member = address2Member[_member];
         return (
-            member.memberAddress,
+            _member,
             member.name,
             member.memberSince
         );
