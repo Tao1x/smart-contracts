@@ -32,6 +32,7 @@ contract HordCongressMembersRegistry {
     // Mapping to store all members addresses
     address[] public allMembers;
 
+
     struct Member {
         address memberAddress;
         bytes32 name;
@@ -164,6 +165,9 @@ contract HordCongressMembersRegistry {
 
         //Reduce 1 member from quorum
         minimalQuorum = minimalQuorum.sub(1);
+
+        // Emit event that member is removed.
+        emit MembershipChanged(targetMember, false);
     }
 
     /**
