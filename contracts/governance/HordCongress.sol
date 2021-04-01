@@ -110,7 +110,7 @@ contract HordCongress {
         bytes[] memory calldatas,
         string memory description
     )
-    public
+    external
     onlyMember
     returns (uint)
     {
@@ -150,7 +150,7 @@ contract HordCongress {
         uint proposalId,
         bool support
     )
-    public
+    external
     onlyMember
     {
         return _castVote(msg.sender, proposalId, support);
@@ -160,7 +160,7 @@ contract HordCongress {
     function execute(
         uint proposalId
     )
-    public
+    external
     onlyMember
     payable
     {
@@ -196,12 +196,12 @@ contract HordCongress {
         emit ProposalExecuted(proposalId);
     }
 
-    function cancel(uint proposalId) public onlyMember {
+    function cancel(uint proposalId) external onlyMember {
         Proposal storage proposal = proposals[proposalId];
         // Require that proposal is not previously executed neither cancelled
         require(proposal.executed == false && proposal.canceled == false);
         // 3 days before proposal can get cancelled
-        require(block.timestamp >= proposal.timestamp.add(259200));
+        require(block.timestamp >= proposal.timestamp + 259200);
         // Proposal with reached minimalQuorum cant be cancelled
         require(proposal.forVotes < membersRegistry.getMinimalQuorum(), "HordCongress:cancel: Proposal already reached quorum");
         // Set that proposal is cancelled
@@ -227,7 +227,7 @@ contract HordCongress {
         emit VoteCast(voter, proposalId, support);
     }
 
-    function getActions(uint proposalId) public view returns (address[] memory targets, uint[] memory values, string[] memory signatures, bytes[] memory calldatas) {
+    function getActions(uint proposalId) external view returns (address[] memory targets, uint[] memory values, string[] memory signatures, bytes[] memory calldatas) {
         Proposal storage p = proposals[proposalId];
         return (p.targets, p.values, p.signatures, p.calldatas);
     }
