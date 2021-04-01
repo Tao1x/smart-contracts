@@ -51,6 +51,9 @@ contract HordCongress {
         // Flag marking whether the proposal has been executed
         bool executed;
 
+        // Timestamp when proposal is created
+        uint timestamp;
+
         // Receipts of ballots for the entire set of voters
         mapping (address => Receipt) receipts;
     }
@@ -132,7 +135,8 @@ contract HordCongress {
             forVotes: 0,
             againstVotes: 0,
             canceled: false,
-            executed: false
+            executed: false,
+            timestamp: block.timestamp
         });
 
         proposals[newProposal.id] = newProposal;
@@ -196,6 +200,8 @@ contract HordCongress {
         Proposal storage proposal = proposals[proposalId];
         // Require that proposal is not previously executed neither cancelled
         require(proposal.executed == false && proposal.canceled == false);
+        // 3 days before proposal can get cancelled
+        require(block.timestamp >= proposal.timestamp.add(259200));
         // Proposal with reached minimalQuorum cant be cancelled
         require(proposal.forVotes < membersRegistry.getMinimalQuorum(), "HordCongress:cancel: Proposal already reached quorum");
         // Set that proposal is cancelled
