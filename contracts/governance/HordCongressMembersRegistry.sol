@@ -69,7 +69,7 @@ contract HordCongressMembersRegistry {
     function changeMinimumQuorum(
         uint newMinimumQuorum
     )
-    public
+    external
     onlyHordCongress
     {
         require(newMinimumQuorum > 0);
@@ -88,7 +88,7 @@ contract HordCongressMembersRegistry {
         address targetMember,
         bytes32 memberName
     )
-    public
+    external
     onlyHordCongress
     {
         addMemberInternal(targetMember, memberName);
@@ -128,7 +128,7 @@ contract HordCongressMembersRegistry {
     function removeMember(
         address targetMember
     )
-    public
+    external
     onlyHordCongress
     {
         require(isMemberInCongress[targetMember] == true);
@@ -175,7 +175,7 @@ contract HordCongressMembersRegistry {
     function isMember(
         address _address
     )
-    public
+    external
     view
     returns (bool)
     {
@@ -185,7 +185,7 @@ contract HordCongressMembersRegistry {
     /// @notice Getter for length for how many members are currently
     /// @return length of members
     function getNumberOfMembers()
-    public
+    external
     view
     returns (uint)
     {
@@ -195,7 +195,7 @@ contract HordCongressMembersRegistry {
     /// @notice Function to get addresses of all members in congress
     /// @return array of addresses
     function getAllMemberAddresses()
-    public
+    external
     view
     returns (address[] memory)
     {
@@ -206,7 +206,7 @@ contract HordCongressMembersRegistry {
     function getMemberInfo(
         address _member
     )
-    public
+    external
     view
     returns (address, bytes32, uint)
     {
@@ -219,7 +219,7 @@ contract HordCongressMembersRegistry {
     }
 
     function getMinimalQuorum()
-    public
+    external
     view
     returns (uint256)
     {

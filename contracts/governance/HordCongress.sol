@@ -97,7 +97,7 @@ contract HordCongress {
     function setMembersRegistry(
         address _membersRegistry
     )
-    public
+    external
     {
         require(address(membersRegistry) == address(0x0));
         membersRegistry = IHordCongressMembersRegistry(_membersRegistry);
