@@ -2,6 +2,7 @@ pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/IHordCongressMembersRegistry.sol";
+import "../libraries/SafeMath.sol";
 
 
 /**
@@ -11,6 +12,9 @@ import "../interfaces/IHordCongressMembersRegistry.sol";
  * Github: madjarevicn
  */
 contract HordCongress {
+    // Use SafeMath library
+    using SafeMath for *;
+
     /// @notice The name of this contract
     string public constant name = "HordCongress";
 
@@ -216,9 +220,9 @@ contract HordCongress {
         require(receipt.hasVoted == false, "HordCongress::_castVote: voter already voted");
 
         if (support) {
-            proposal.forVotes = add256(proposal.forVotes, 1);
+            proposal.forVotes = proposal.forVotes.add(1);
         } else {
-            proposal.againstVotes = add256(proposal.againstVotes, 1);
+            proposal.againstVotes = proposal.againstVotes.sub(1);
         }
 
         receipt.hasVoted = true;
@@ -238,12 +242,6 @@ contract HordCongress {
     returns (address)
     {
         return address(membersRegistry);
-    }
-
-    function add256(uint256 a, uint256 b) internal pure returns (uint) {
-        uint c = a + b;
-        require(c >= a, "addition overflow");
-        return c;
     }
 
     receive() external payable {
