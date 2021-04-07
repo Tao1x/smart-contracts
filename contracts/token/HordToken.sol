@@ -176,7 +176,10 @@ contract HordToken is Context, IERC20, IERC20Metadata {
      * - `spender` cannot be the zero address.
      */
     function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender] + addedValue);
+        // Uint overflow protection
+        uint newAllowance = _allowances[_msgSender()][spender] + addedValue;
+        require(newAllowance >= addedValue, "addition overflow");
+        _approve(_msgSender(), spender, newAllowance);
         return true;
     }
 
