@@ -100,7 +100,6 @@ describe('Governance', () => {
         });
 
         describe('Should BE able to propose from congress member', async() => {
-
             it(`should create a proposal to transfer ${tokensToTransfer} tokens from Congress`, async() => {
                 r = await awaitTx(hordCongress.propose(targets, values, signatures, calldatas, description));
             });
@@ -118,6 +117,22 @@ describe('Governance', () => {
                 expect(proposalId).to.be.equal(numberOfProposals);
             });
         });
+
+        describe('Should BE able to vote on submitted proposal', async() => {
+            it(`should vote on proposal`, async() => {
+                r = await awaitTx(hordCongress.castVote(proposalId, true));
+            });
+
+            it(`should vote from ${anotherAccountAddr} for proposal`, async() => {
+                r = await awaitTx(hordCongress.connect(anotherAccount).castVote(proposalId, true));
+            })
+
+            it('should execute proposal', async() => {
+                r = await awaitTx(hordCongress.execute(proposalId));
+                expect(r.events.length).to.equal(3);
+                expect(r.events[2].event).to.equal('ProposalExecuted');
+            })
+        })
     })
 
 
