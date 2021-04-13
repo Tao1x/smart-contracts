@@ -4,7 +4,9 @@ const {
 
 
 async function main() {
-    encodeParameters(process.argv[1], process.argv[2]);
+    let types = process.argv[2];
+    let values = process.argv[3];
+    console.log('Encoded: ',encodeParameters(types.split(','), values.split(',')));
 }
 
 
