@@ -19,7 +19,7 @@ function saveContractAddress(network, contract, address, env) {
     if(!env) {
         env = 'local'
     }
-    const addrs = getSavedContractAddresses()
+    const addrs = getSavedContractAddresses(env)
     addrs[network] = addrs[network] || {}
     addrs[network][contract] = address
     fs.writeFileSync(path.join(__dirname, `../deployments/contract-addresses-${env}.json`), JSON.stringify(addrs, null, '    '))
@@ -42,7 +42,7 @@ function saveContractBytecode(network, contract, bytecode, env) {
     if(!env) {
         env = 'local'
     }
-    const bytecodes = getSavedContractBytecodes()
+    const bytecodes = getSavedContractBytecodes(env)
     bytecodes[network] = bytecodes[network] || {}
     bytecodes[network][contract] = bytecode
     fs.writeFileSync(path.join(__dirname, `../deployments/contract-bytecodes-${env}.json`), JSON.stringify(bytecodes, null, '    '))
