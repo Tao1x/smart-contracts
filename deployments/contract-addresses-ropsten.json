@@ -1,0 +1,7 @@
+{
+    "ropsten": {
+        "hordCongress": "0x4981B3d3CBa6fE660A4DA390a31b83e8dC28e40D",
+        "hordCongressMembersRegistry": "0x9C5539B83Da7e02F965EcFc5df45a85B798D9B0a",
+        "hordToken": "0xF0f8D089136c88D99EAB8De4e84cae347B52AA63"
+    }
+}
