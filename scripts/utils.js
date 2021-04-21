@@ -1,10 +1,10 @@
 const fs = require('fs')
 const path = require('path')
 
-function getSavedContractAddresses(network) {
+function getSavedContractAddresses() {
     let json
     try {
-        json = fs.readFileSync(path.join(__dirname, `../deployments/contract-addresses-${network}.json`))
+        json = fs.readFileSync(path.join(__dirname, `../deployments/contract-addresses.json`))
     } catch (err) {
         json = '{}'
     }
@@ -12,27 +12,33 @@ function getSavedContractAddresses(network) {
 }
 
 function saveContractAddress(network, contract, address) {
-    const addrs = getSavedContractAddresses(network)
+    const addrs = getSavedContractAddresses()
     addrs[network] = addrs[network] || {}
     addrs[network][contract] = address
-    fs.writeFileSync(path.join(__dirname, `../deployments/contract-addresses-${network}.json`), JSON.stringify(addrs, null, '    '))
+    fs.writeFileSync(path.join(__dirname, `../deployments/contract-addresses.json`), JSON.stringify(addrs, null, '    '))
 }
 
-function getSavedContractBytecodes(network) {
+function getSavedContractBytecodes(env) {
+    if(!env) {
+        env = 'local'
+    }
     let json
     try {
-        json = fs.readFileSync(path.join(__dirname, `../deployments/contract-bytecodes-${network}.json`))
+        json = fs.readFileSync(path.join(__dirname, `../deployments/contract-bytecodes.json`))
     } catch (err) {
         json = '{}'
     }
-    return JSON.parse(json)
+    return JSON.parse(json[env])
 }
 
-function saveContractBytecode(network, contract, bytecode) {
-    const bytecodes = getSavedContractBytecodes(network)
+function saveContractBytecode(network, contract, bytecode, env) {
+    if(!env) {
+        env = 'local'
+    }
+    const bytecodes = getSavedContractBytecodes()
     bytecodes[network] = bytecodes[network] || {}
     bytecodes[network][contract] = bytecode
-    fs.writeFileSync(path.join(__dirname, `../deployments/contract-bytecodes-${network}.json`), JSON.stringify(bytecodes, null, '    '))
+    fs.writeFileSync(path.join(__dirname, `../deployments/contract-bytecodes.json`), JSON.stringify(bytecodes, null, '    '))
 }
 
 module.exports = {
