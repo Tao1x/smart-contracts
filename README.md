@@ -2,7 +2,8 @@
 
 _HORD enables crypto champions to tokenize and monetize their influence, and empowers crypto lovers to evolve from following news and tips to capitalizing on information flow._
 
-Website: [https://hord.app][Official website]
+- Website: [https://hord.app][Official website]
+- Community: [https://t.me/hord_app][Official telegram community]
 
 ### Developer instructions
 
@@ -31,3 +32,5 @@ All deployed addresses and bytecodes can be found inside `deployments/contract-a
 
 
 [Official website]: https://hord.app
+
+[Official telegram community]: https://t.me/hord_app
