@@ -24,6 +24,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
     uint256 public stakeAmountPerTicket;
     // Store always last ID minted
     uint256 public  lastMintedTokenId;
+
     // Token being staked
     IERC20 stakingToken;
 
@@ -47,7 +48,6 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
 
     // Mapping user address to his stake
     mapping(address => Stake) public addressToStake;
-
 
     mapping(uint256 => uint256) public tokenIdToNumberOfTicketsReserved;
 
@@ -83,6 +83,18 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
     onlyHordCongress
     {
         _unpause();
+    }
+
+    function burnTickets(
+        bytes signature,
+        uint tokenId,
+        uint amountToBurn
+    )
+    public
+    onlyMaintainer
+    {
+        //TODO: Validate signature
+//        _burn
     }
 
     /**
