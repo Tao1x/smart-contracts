@@ -1,8 +1,8 @@
 ## Hord.app Smart Contracts
 
-_HORD enables crypto champions to tokenize and monetize their influence, and empowers crypto lovers to evolve from following news and tips to capitalizing on information flow._
+<img src="./favicon.png" width="100">
 
-<img src="./favicon.png" width="200">
+_HORD enables crypto champions to tokenize and monetize their influence, and empowers crypto lovers to evolve from following news and tips to capitalizing on information flow._
 
 - Website: [https://hord.app][Official website]
 - Community: [https://t.me/hord_app][Official telegram community]
