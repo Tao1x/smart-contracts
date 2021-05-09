@@ -2,6 +2,8 @@
 
 _HORD enables crypto champions to tokenize and monetize their influence, and empowers crypto lovers to evolve from following news and tips to capitalizing on information flow._
 
+<img src="./favicon.png" width="200">
+
 - Website: [https://hord.app][Official website]
 - Community: [https://t.me/hord_app][Official telegram community]
 
