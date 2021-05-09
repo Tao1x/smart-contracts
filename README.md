@@ -1,6 +1,6 @@
 ## Hord.app Smart Contracts
 
-<img src="./favicon.png" width="100">
+<img style="float: left;" src="./favicon.png">
 
 _HORD enables crypto champions to tokenize and monetize their influence, and empowers crypto lovers to evolve from following news and tips to capitalizing on information flow._
 
