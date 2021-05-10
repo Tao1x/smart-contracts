@@ -24,49 +24,51 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
     uint256 public stakeAmountPerTicket;
     // Store always last ID minted
     uint256 public  lastMintedTokenId;
-
     // Token being staked
     IERC20 stakingToken;
+    // Mapping champion ID to handle
+    mapping (uint256 => string) championIdToHandle;
 
-    //TODO each champion will have one tokenId per pool, each tokenId will have a gen, and they can have as many gens as they have pools
-    //TODO for champion struct - data is champion_id, champion_handle
-    //TODO for hpool_nft struct - token_id, champion_id, champion_handle, nft_gen
-    // Champion structure
-    struct Champion {
-        string handle;
-        uint256 nftGen;
+    // Number of champions registered
+    uint256 public numberOfChampions;
+
+    /// HPool Information
+    struct HPool {
+        uint256 championId;
         uint256 tokenId;
+        uint256 nftGen;
     }
 
-    //TODO add getters from champion id to their tokens and champion handle to their tokens
-
-    //TODO we won't have champion address
-    // Mapping user address to champion
-    mapping(address => Champion) public addressToChampion;
-    // All champions
-    address [] public champions;
-
-    //TODO when minting a new token_id, set the required amount of tokens and time to purchase/get 1 (default to defaults for hord)
-    //TODO create a token_staking_rules/structs structure should map from token_id to time_to_get_1 amount_to_get_1
-
-    //TODO rename to UserStake, add created_at for time computes
-    // Stake structure
-    struct Stake {
-        uint tokenId;
-        uint amountStaked;
-        uint amountOfTicketsGetting;
+    /// Token ID rules for getting tickets with this ID
+    struct TokenIdStakingRules {
+        uint256 timeToStake;
+        uint256 amountToStake;
     }
 
-    //TODO support multiple stakes per user
+    // Mapping champion handle to all HPools
+    mapping (string => HPool[]) championIdToHPools;
+
+    /// Users stake
+    struct UserStake {
+        uint256 tokenId;
+        uint256 amountStaked;
+        uint256 amountOfTicketsGetting;
+        uint256 unlockingTime;
+        bool isWithdrawn;
+    }
+
     // Mapping user address to his stake
-    mapping(address => Stake) public addressToStake;
-
-
+    mapping(address => UserStake[]) public addressToStakes;
     mapping(uint256 => uint256) public tokenIdToNumberOfTicketsReserved;
 
-    //TODO add n_tickets_reserved, unlocking_time
-    // Emit every time someone stakes token
-    event TokensStaked(address user, uint amountStaked, uint inFavorOfTokenId);
+    /// Emit every time someone stakes token
+    event TokensStaked(
+        address user,
+        uint amountStaked,
+        uint inFavorOfTokenId,
+        uint numberOfTicketsReserved,
+        uint unlockingTime
+    );
 
     constructor(
         address _hordCongress,
@@ -83,7 +85,10 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         stakingToken = IERC20(_stakingToken);
     }
 
-    // Pause contract
+    /**
+     * @notice  Function allowing congress to pause the smart-contract
+     * @dev     Can be only called by HordCongress
+     */
     function pause()
     public
     onlyHordCongress
@@ -91,7 +96,10 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         _pause();
     }
 
-    // UnPause contract
+    /**
+     * @notice  Function allowing congress to unpause the smart-contract
+     * @dev     Can be only called by HordCongress
+     */
     function unpause()
     public
     onlyHordCongress
@@ -99,8 +107,9 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         _unpause();
     }
 
+
     function burnTickets(
-        bytes signature,
+        bytes memory signature,
         uint tokenId,
         uint amountToBurn
     )
@@ -111,97 +120,120 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
 //        _burn
     }
 
-    //TODO add function for maintainer to add supply to a specific token id
-
     /**
-     *
+     * @notice  Register champion, store handle and ID
+     * @param   championId is going to be the ID of that champion
+     * @param   handle is the handle to which ID is mapped.
      */
-    function mintNewHPoolNFT(
-        uint256 tokenId,
-        uint256 initialSupply,   //make sure backend sends as main units not wei
-        address championAddress, //TODO to champion_id
-        string memory championHandle,
-        uint256 championNftGen,
-        bytes memory data
+    function registerChampion(
+        uint championId,
+        string memory handle
     )
     public
     onlyMaintainer
     {
-        require(initialSupply <= maxFungibleTicketsPerPool, "MintNewHPoolNFT: Initial supply overflow.");
-        require(tokenId == lastMintedTokenId.add(1), "MintNewHPoolNFT: Token ID is wrong.");
-        // Mint tokens and store them on contract itself
-        _mint(address(this), tokenId, initialSupply, data);
+        require(championId == numberOfChampions.add(1), "registerChampion: Champion ID is not in order.");
+        // Take current handle (shouldn't exist)
+        string memory currentHandle = championIdToHandle[championId];
+        require(keccak256(abi.encodePacked(currentHandle)) == keccak256(abi.encodePacked("")), "registerChampion: Champion Handle already exists.");
 
-        Champion memory c = Champion({
-            handle: championHandle,
-            nftGen: championNftGen,
-            tokenId: tokenId
-        });
-
-        //TODO: Discuss with eiTan
-
-        // Map address to champion
-        addressToChampion[championAddress] = c;
-        champions.push(championAddress);
-
-        // Store always last minted token id.
-        lastMintedTokenId = tokenId;
+        // Store champion handle
+        championIdToHandle[championId] = handle;
+        // Increase number of registered champions
+        numberOfChampions++;
     }
 
-    //TODO rename to stakeAndReserveNFTs
-    function stakeHordTokens(
-        uint tokenId,
-        uint numberOfTickets
-    )
-    public
-    {
-        //TODO: Can user enter to this function for same tokenId multiple times??
-
-        // Get number of reserved tickets
-        uint256 numberOfTicketsReserved = tokenIdToNumberOfTicketsReserved[tokenId];
-        // Check there's enough tickets to get
-
-        //TODO work with actual supply per the token id not the max supply
-        require(numberOfTicketsReserved + numberOfTickets <= maxFungibleTicketsPerPool, "Not enough tickets to sell.");
-
-        // Fixed stake per ticket
-        uint amountOfTokensToStake = stakeAmountPerTicket.mul(numberOfTickets);
-
-        // Transfer tokens from user
-        stakingToken.transferFrom(
-            msg.sender,
-            address(this),
-            amountOfTokensToStake
-        );
-
-        Stake memory s = Stake({
-            tokenId: tokenId,
-            amountStaked: amountOfTokensToStake,
-            amountOfTicketsGetting: numberOfTickets
-        });
-
-        // Map this address to stake
-        addressToStake[msg.sender] = s;
-
-        // Increase number of tickets reserved
-        tokenIdToNumberOfTicketsReserved[tokenId] = numberOfTicketsReserved + numberOfTickets;
-
-        //TODO emit an event TokensStaked
-
-
-    }
-
-    //TODO add getter for how many tokens claimed per token id (supply for that token minus the balance of this contract)
-
-    //TODO rename to claimNFTs
-    function claimTickets(
-        uint tokenId
-    )
-    public
-    {
-        //TODO emit NFTsClaimed event:    address, n_tokens_unstaked, n_tickets_claimed, token_id
-
-
-    }
+//    //TODO add function for maintainer to add supply to a specific token id
+//    //TODO when minting a new token_id, set the required amount of tokens and time to purchase/get 1 (default to defaults for hord)
+//    /**
+//     *
+//     */
+//    function mintNewHPoolNFT(
+//        uint256 tokenId,
+//        uint256 initialSupply,
+//        address championId,
+//        string memory championHandle,
+//        uint256 championNftGen,
+//        bytes memory data
+//    )
+//    public
+//    onlyMaintainer
+//    {
+//        require(initialSupply <= maxFungibleTicketsPerPool, "MintNewHPoolNFT: Initial supply overflow.");
+//        require(tokenId == lastMintedTokenId.add(1), "MintNewHPoolNFT: Token ID is wrong.");
+//        // Mint tokens and store them on contract itself
+//        _mint(address(this), tokenId, initialSupply, data);
+//
+//        Champion memory c = Champion({
+//            handle: championHandle,
+//            nftGen: championNftGen,
+//            tokenId: tokenId
+//        });
+//
+//        //TODO: Discuss with eiTan
+//
+//        // Map address to champion
+//        addressToChampion[championAddress] = c;
+//        champions.push(championAddress);
+//
+//        // Store always last minted token id.
+//        lastMintedTokenId = tokenId;
+//    }
+//
+//    //TODO rename to stakeAndReserveNFTs
+//    function stakeHordTokens(
+//        uint tokenId,
+//        uint numberOfTickets
+//    )
+//    public
+//    {
+//        //TODO: Can user enter to this function for same tokenId multiple times??
+//
+//        // Get number of reserved tickets
+//        uint256 numberOfTicketsReserved = tokenIdToNumberOfTicketsReserved[tokenId];
+//        // Check there's enough tickets to get
+//
+//        //TODO work with actual supply per the token id not the max supply
+//        require(numberOfTicketsReserved + numberOfTickets <= maxFungibleTicketsPerPool, "Not enough tickets to sell.");
+//
+//        // Fixed stake per ticket
+//        uint amountOfTokensToStake = stakeAmountPerTicket.mul(numberOfTickets);
+//
+//        // Transfer tokens from user
+//        stakingToken.transferFrom(
+//            msg.sender,
+//            address(this),
+//            amountOfTokensToStake
+//        );
+//
+//        Stake memory s = Stake({
+//            tokenId: tokenId,
+//            amountStaked: amountOfTokensToStake,
+//            amountOfTicketsGetting: numberOfTickets
+//        });
+//
+//        // Map this address to stake
+//        addressToStake[msg.sender] = s;
+//
+//        // Increase number of tickets reserved
+//        tokenIdToNumberOfTicketsReserved[tokenId] = numberOfTicketsReserved + numberOfTickets;
+//
+//        //TODO emit an event TokensStaked
+//
+//
+//    }
+//
+//    //TODO add getter for how many tokens claimed per token id (supply for that token minus the balance of this contract)
+//
+//    //TODO rename to claimNFTs
+//    function claimTickets(
+//        uint tokenId
+//    )
+//    public
+//    {
+//        //TODO emit NFTsClaimed event:    address, n_tokens_unstaked, n_tickets_claimed, token_id
+//
+//
+//    }
 
 }

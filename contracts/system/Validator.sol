@@ -40,30 +40,23 @@ contract Validator is HordUpgradable {
     /**
      * @notice          Function to verify withdraw parameters and if signatory signed message
      * @param           signedMessage is the message to verify
-     * @param           beneficiary is the address of user for who we signed message
-     * @param           token is the address of the token being withdrawn
-     * @param           amount is the amount of tokens user is attempting to withdraw
      */
     function verifyWithdraw(
         bytes memory signedMessage,
-        address token,
-        uint256 amount,
-        address beneficiary
+        uint256 tokenId,
+        uint256 amount
     )
     external
     view
     returns (bool)
     {
-        address messageSigner = recoverSignature(signedMessage, beneficiary, token, amount);
+        address messageSigner = recoverSignature(signedMessage, tokenId, amount);
         return messageSigner == signatoryAddress;
     }
 
     /**
      * @notice          Function to can check who signed the message
      * @param           signedMessage is the message to verify
-     * @param           beneficiary is the address of user for who we signed message
-     * @param           token is the address of the token being withdrawn
-     * @param           amount is the amount of tokens user is attempting to withdraw
      */
     function recoverSignature(
         bytes memory signedMessage,
