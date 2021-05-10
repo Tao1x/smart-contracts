@@ -59,7 +59,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
     }
 
     // Mapping user address to his stake
-    mapping(address => UserStake[]) public addressToStakes;
+    mapping(address => mapping(uint => UserStake[])) public addressToTokenIdToStakes;
     mapping(uint256 => uint256) public tokenIdToNumberOfTicketsReserved;
 
     /// Emit every time someone stakes token
@@ -69,6 +69,13 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         uint inFavorOfTokenId,
         uint numberOfTicketsReserved,
         uint unlockingTime
+    );
+
+    event NFTsClaimed(
+        address beneficiary,
+        uint256 amountUnstaked,
+        uint256 amountTicketsClaimed,
+        uint tokenId
     );
 
     constructor(
@@ -133,10 +140,10 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
     public
     onlyMaintainer
     {
-        require(championId == numberOfChampions.add(1), "registerChampion: Champion ID is not in order.");
+        require(championId == numberOfChampions.add(1), "RegisterChampion: Champion ID is not in order.");
         // Take current handle (shouldn't exist)
         string memory currentHandle = championIdToHandle[championId];
-        require(keccak256(abi.encodePacked(currentHandle)) == keccak256(abi.encodePacked("")), "registerChampion: Champion Handle already exists.");
+        require(keccak256(abi.encodePacked(currentHandle)) == keccak256(abi.encodePacked("")), "RegisterChampion: Champion Handle already exists.");
 
         // Store champion handle
         championIdToHandle[championId] = handle;
@@ -144,7 +151,17 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         numberOfChampions++;
     }
 
-    //TODO add function for maintainer to add supply to a specific token id
+    /// Function where maintainer can expand token supply
+    function addTokenSupply(
+        uint256 tokenId,
+        uint256 supplyToAdd
+    )
+    public
+    onlyMaintainer
+    {
+        require(tokenIDToInitialSupply[tokenId] > 0, "AddTokenSupply: Firstly MINT token, then expand supply.");
+        _mint(address(this), tokenId, supplyToAdd, "0x0");
+    }
 
     /**
      *
@@ -155,8 +172,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         uint256 championId,
         uint256 championNftGen,
         uint256 purchaseStakeTime,
-        uint256 purchaseStakeAmount,
-        bytes memory data
+        uint256 purchaseStakeAmount
     )
     public
     onlyMaintainer
@@ -169,7 +185,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         tokenIDToInitialSupply[tokenId] = initialSupply;
 
         // Mint tokens and store them on contract itself
-        _mint(address(this), tokenId, initialSupply, data);
+        _mint(address(this), tokenId, initialSupply, "0x0");
 
         // Create hPool structure
         HPool memory hPool = HPool(
@@ -228,7 +244,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
             isWithdrawn: false
         });
 
-        addressToStakes[msg.sender].push(userStake);
+        addressToTokenIdToStakes[msg.sender][tokenId].push(userStake);
 
         // Increase number of tickets reserved
         tokenIdToNumberOfTicketsReserved[tokenId] = numberOfTicketsReserved + numberOfTickets;
@@ -242,19 +258,62 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         );
     }
 
+    /// Function to claim NFTs
+    function claimNFTs(
+        uint tokenId
+    )
+    public
+    {
+        UserStake [] storage userStakesForNft = addressToTokenIdToStakes[msg.sender][tokenId];
+
+        uint256 totalStakeToWithdraw;
+        uint256 ticketsToWithdraw;
+
+        uint256 i = 0;
+        while (i < userStakesForNft.length) {
+            UserStake storage stake = userStakesForNft[i];
+
+            if(stake.isWithdrawn || stake.unlockingTime > block.timestamp) {
+                continue;
+            }
+
+            totalStakeToWithdraw = stake.amountStaked;
+            ticketsToWithdraw = stake.amountOfTicketsGetting;
+
+            stake.isWithdrawn = true;
+        }
+
+        // Transfer staking tokens
+        stakingToken.transfer(msg.sender, totalStakeToWithdraw);
+
+        // Transfer NFTs
+        safeTransferFrom(
+            address(this),
+            msg.sender,
+            tokenId,
+            ticketsToWithdraw,
+            "0x0"
+        );
+
+        // Emit event
+        emit NFTsClaimed(
+            msg.sender,
+            totalStakeToWithdraw,
+            ticketsToWithdraw,
+            tokenId
+        );
+    }
 
 
-    //TODO add getter for how many tokens claimed per token id (supply for that token minus the balance of this contract)
+    /// Function to return amount of specific NFTs claimed from contract
+    function getAmountOfTokensClaimed(uint tokenId)
+    external
+    view
+    returns (uint256)
+    {
+        return tokenIDToInitialSupply[tokenId].sub(balanceOf(address(this), tokenId));
+    }
 
-//    //TODO rename to claimNFTs
-//    function claimTickets(
-//        uint tokenId
-//    )
-//    public
-//    {
-//        //TODO emit NFTsClaimed event:    address, n_tokens_unstaked, n_tickets_claimed, token_id
-//
-//
-//    }
+
 
 }
