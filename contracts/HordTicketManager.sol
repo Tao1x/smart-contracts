@@ -28,25 +28,23 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
     IERC20 stakingToken;
     // Mapping champion ID to handle
     mapping (uint256 => string) championIdToHandle;
-
     // Number of champions registered
     uint256 public numberOfChampions;
-
     /// HPool Information
     struct HPool {
         uint256 championId;
         uint256 tokenId;
         uint256 nftGen;
     }
-
     /// Token ID rules for getting tickets with this ID
-    struct TokenIdStakingRules {
+    struct TokenStakingRules {
         uint256 timeToStake;
         uint256 amountToStake;
     }
 
+    mapping (uint256 => TokenStakingRules) public tokenIdToStakingRules;
     // Mapping champion handle to all HPools
-    mapping (string => HPool[]) championIdToHPools;
+    mapping (string => HPool[]) championHandleToHPools;
 
     /// Users stake
     struct UserStake {
@@ -143,42 +141,55 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         numberOfChampions++;
     }
 
-//    //TODO add function for maintainer to add supply to a specific token id
-//    //TODO when minting a new token_id, set the required amount of tokens and time to purchase/get 1 (default to defaults for hord)
-//    /**
-//     *
-//     */
-//    function mintNewHPoolNFT(
-//        uint256 tokenId,
-//        uint256 initialSupply,
-//        address championId,
-//        string memory championHandle,
-//        uint256 championNftGen,
-//        bytes memory data
-//    )
-//    public
-//    onlyMaintainer
-//    {
-//        require(initialSupply <= maxFungibleTicketsPerPool, "MintNewHPoolNFT: Initial supply overflow.");
-//        require(tokenId == lastMintedTokenId.add(1), "MintNewHPoolNFT: Token ID is wrong.");
-//        // Mint tokens and store them on contract itself
-//        _mint(address(this), tokenId, initialSupply, data);
-//
-//        Champion memory c = Champion({
-//            handle: championHandle,
-//            nftGen: championNftGen,
-//            tokenId: tokenId
-//        });
-//
-//        //TODO: Discuss with eiTan
-//
-//        // Map address to champion
-//        addressToChampion[championAddress] = c;
-//        champions.push(championAddress);
-//
-//        // Store always last minted token id.
-//        lastMintedTokenId = tokenId;
-//    }
+    //TODO add function for maintainer to add supply to a specific token id
+
+    /**
+     *
+     */
+    function mintNewHPoolNFT(
+        uint256 tokenId,
+        uint256 initialSupply,
+        uint256 championId,
+        uint256 championNftGen,
+        uint256 purchaseStakeTime,
+        uint256 purchaseStakeAmount,
+        bytes memory data
+    )
+    public
+    onlyMaintainer
+    {
+        require(initialSupply <= maxFungibleTicketsPerPool, "MintNewHPoolNFT: Initial supply overflow.");
+        require(tokenId == lastMintedTokenId.add(1), "MintNewHPoolNFT: Token ID is wrong.");
+        require(championId < numberOfChampions, "MintNewHPoolNFT: Champion ID does not exist.");
+
+        // Mint tokens and store them on contract itself
+        _mint(address(this), tokenId, initialSupply, data);
+
+        // Create hPool structure
+        HPool memory hPool = HPool(
+            championId,
+            tokenId,
+            championNftGen
+        );
+
+        // Fetch champion handle
+        string memory championHandle = championIdToHandle[championId];
+
+        // Map pool to champion handle
+        championHandleToHPools[championHandle].push(hPool);
+
+        // Create staking rules for token
+        TokenStakingRules memory tokenIdStakingRules = TokenStakingRules(
+            purchaseStakeTime,
+            purchaseStakeAmount
+        );
+
+        // Map staking rules to token id
+        tokenIdToStakingRules[tokenId] = tokenIdStakingRules;
+
+        // Store always last minted token id.
+        lastMintedTokenId = tokenId;
+    }
 //
 //    //TODO rename to stakeAndReserveNFTs
 //    function stakeHordTokens(
