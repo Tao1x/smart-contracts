@@ -42,6 +42,9 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         uint256 amountToStake;
     }
 
+    // Mapping token ID to initial supply
+    mapping (uint256 => uint256) tokenIDToInitialSupply;
+
     mapping (uint256 => TokenStakingRules) public tokenIdToStakingRules;
     // Mapping champion handle to all HPools
     mapping (string => HPool[]) championHandleToHPools;
@@ -162,6 +165,9 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         require(tokenId == lastMintedTokenId.add(1), "MintNewHPoolNFT: Token ID is wrong.");
         require(championId < numberOfChampions, "MintNewHPoolNFT: Champion ID does not exist.");
 
+        // Set initial supply
+        tokenIDToInitialSupply[tokenId] = initialSupply;
+
         // Mint tokens and store them on contract itself
         _mint(address(this), tokenId, initialSupply, data);
 
@@ -190,52 +196,56 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder, ERC1155Pausable {
         // Store always last minted token id.
         lastMintedTokenId = tokenId;
     }
-//
-//    //TODO rename to stakeAndReserveNFTs
-//    function stakeHordTokens(
-//        uint tokenId,
-//        uint numberOfTickets
-//    )
-//    public
-//    {
-//        //TODO: Can user enter to this function for same tokenId multiple times??
-//
-//        // Get number of reserved tickets
-//        uint256 numberOfTicketsReserved = tokenIdToNumberOfTicketsReserved[tokenId];
-//        // Check there's enough tickets to get
-//
-//        //TODO work with actual supply per the token id not the max supply
-//        require(numberOfTicketsReserved + numberOfTickets <= maxFungibleTicketsPerPool, "Not enough tickets to sell.");
-//
-//        // Fixed stake per ticket
-//        uint amountOfTokensToStake = stakeAmountPerTicket.mul(numberOfTickets);
-//
-//        // Transfer tokens from user
-//        stakingToken.transferFrom(
-//            msg.sender,
-//            address(this),
-//            amountOfTokensToStake
-//        );
-//
-//        Stake memory s = Stake({
-//            tokenId: tokenId,
-//            amountStaked: amountOfTokensToStake,
-//            amountOfTicketsGetting: numberOfTickets
-//        });
-//
-//        // Map this address to stake
-//        addressToStake[msg.sender] = s;
-//
-//        // Increase number of tickets reserved
-//        tokenIdToNumberOfTicketsReserved[tokenId] = numberOfTicketsReserved + numberOfTickets;
-//
-//        //TODO emit an event TokensStaked
-//
-//
-//    }
-//
-//    //TODO add getter for how many tokens claimed per token id (supply for that token minus the balance of this contract)
-//
+
+    function stakeAndReserveNFTs(
+        uint tokenId,
+        uint numberOfTickets
+    )
+    public
+    {
+        // Get number of reserved tickets
+        uint256 numberOfTicketsReserved = tokenIdToNumberOfTicketsReserved[tokenId];
+        // Check there's enough tickets to get
+        require(numberOfTicketsReserved.add(numberOfTickets)<= tokenIDToInitialSupply[tokenId], "Not enough tickets to sell.");
+
+        TokenStakingRules memory tsr = tokenIdToStakingRules[tokenId];
+
+        // Fixed stake per ticket
+        uint amountOfTokensToStake = tsr.amountToStake.mul(numberOfTickets);
+
+        // Transfer tokens from user
+        stakingToken.transferFrom(
+            msg.sender,
+            address(this),
+            amountOfTokensToStake
+        );
+
+        UserStake memory userStake = UserStake({
+            tokenId: tokenId,
+            amountStaked: amountOfTokensToStake,
+            amountOfTicketsGetting: numberOfTickets,
+            unlockingTime: tsr.timeToStake.add(block.timestamp),
+            isWithdrawn: false
+        });
+
+        addressToStakes[msg.sender].push(userStake);
+
+        // Increase number of tickets reserved
+        tokenIdToNumberOfTicketsReserved[tokenId] = numberOfTicketsReserved + numberOfTickets;
+
+        emit TokensStaked(
+            msg.sender,
+            amountOfTokensToStake,
+            tokenId,
+            numberOfTickets,
+            userStake.unlockingTime
+        );
+    }
+
+
+
+    //TODO add getter for how many tokens claimed per token id (supply for that token minus the balance of this contract)
+
 //    //TODO rename to claimNFTs
 //    function claimTickets(
 //        uint tokenId
