@@ -14,42 +14,18 @@ import "./libraries/SafeMath.sol";
  */
 contract HordTicketManager is HordUpgradable, ERC1155Holder {
 
-    //TODO: remove handle from contract alexa will get from handle to id from the backend and search contracts only by id
-    //TODO: remove handle, time to stake, amount to stake from the minting of ticket series
-    //TODO: remove nftGen from the contract
-    //TODO: map champion id to token ids
-    //TODO: delete hpool
-    //TODO: delete tokenstakingrules
-
     using SafeMath for *;
 
-    // Mapping champion ID to handle
-    mapping (uint256 => string) championIdToHandle; //handle can change, ID cannot
-    // Number of champions registered
-    uint256 internal numberOfChampions;
+    // Minimal time to stake in order to be eligible for claiming NFT
+    uint256 public minTimeToStake;
+    // Minimal amount to stake in order to be eligible for claiming NFT
+    uint256 public minAmountToStake;
     // Token being staked
     IERC20 stakingToken;
     // Factory of Hord tickets
     IHordTicketFactory public hordTicketFactory;
-
-    // HPool Information
-    struct HPool {
-        uint256 championId;
-        uint256 tokenId;
-        uint256 nftGen;
-    }
-
-    // Token ID rules for getting tickets with this ID
-    struct TokenStakingRules {
-        uint256 timeToStake;
-        uint256 amountToStake;
-    }
-
-    /// @dev Mapping tokenId to staking rules for that token (class)
-    mapping (uint256 => TokenStakingRules) public tokenIdToStakingRules;
-
-    /// @dev Mapping champion handle to all HPools
-    mapping (string => HPool[]) public championHandleToHPools;  #we don't yet have hpool structures, only nfts
+    // Mapping championId to tokenIds
+    mapping (uint256 => uint256[]) championIdToMintedTokensIds;
 
     // Users stake
     struct UserStake {
@@ -106,71 +82,21 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
         hordTicketFactory = IHordTicketFactory(_hordTicketFactory);
     }
 
-    /**
-     * @notice  Register champion, store handle and ID
-     * @param   championId is the ID of that champion
-     * @param   handle is the handle to which ID is mapped.
-     */
-    function registerChampion(
-        uint championId,
-        string memory handle
-    )
-    public
-    onlyMaintainer
-    {
-        require(championId == numberOfChampions.add(1), "RegisterChampion: Champion ID is not in order."); //TODO: delete unless its absolutely required
-        // Take current handle (shouldn't exist)
-        string memory currentHandle = championIdToHandle[championId];
-        require(keccak256(abi.encodePacked(currentHandle)) == keccak256(abi.encodePacked("")), "RegisterChampion: Champion Handle already exists.");
-
-        // Store champion handle
-        championIdToHandle[championId] = handle;
-        // Increase number of registered champions
-        numberOfChampions++;
-    }
-
-    //TODO: allow to update handle
 
     /**
-     * @notice  Create HPools nd token staking rules. Executed every time maintainer mints new series of NFTs
+     * @notice  Map token id with champion id
      * @param   tokenId is the ID of the token (representing token class / series)
      * @param   championId is the ID of the champion
-     * @param   championNftGen ...thi
-     * @param   purchaseStakeTime is time user has to stake tokens in order to claim the NFTs
-     * @param   purchaseStakeAmount is amount of tokens user has to stake in order to claim the NFTs
      */
-    function createHPoolAndTokenStakingRules(  //TODO we're not creating hpools yet, just the tickets
+    function addNewTokenIdForChampion(
         uint tokenId,
-        uint championId,
-        uint256 championNftGen,
-        uint256 purchaseStakeTime,
-        uint256 purchaseStakeAmount
+        uint championId
     )
     external
     {
         require(msg.sender == address(hordTicketFactory), "Only Hord Ticket factory can issue a call to this function");
-
-        // Create hPool structure
-        HPool memory hPool = HPool(  //TODO should be hpool_nft structure not hpool structure
-            championId,
-            tokenId,
-            championNftGen
-        );
-
-        // Fetch champion handle
-        string memory championHandle = championIdToHandle[championId];
-
-        // Map pool to champion handle
-        championHandleToHPools[championHandle].push(hPool);  //TODO put all mappings vs id, and only have one place mapping from handle to id so we can update handle and still everything will work
-
-        // Create staking rules for token
-        TokenStakingRules memory tokenIdStakingRules = TokenStakingRules(
-            purchaseStakeTime,
-            purchaseStakeAmount
-        );
-
-        // Map staking rules to token id
-        tokenIdToStakingRules[tokenId] = tokenIdStakingRules;
+        // Push token Id to champion id
+        championIdToMintedTokensIds[championId].push(tokenId);
     }
 
     /**
@@ -190,10 +116,8 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
         require(numberOfTicketsReserved.add(numberOfTickets)<= hordTicketFactory.getTokenSupply(tokenId),
             "Not enough tickets to sell.");
 
-        TokenStakingRules memory tsr = tokenIdToStakingRules[tokenId];
-
         // Fixed stake per ticket
-        uint amountOfTokensToStake = tsr.amountToStake.mul(numberOfTickets);
+        uint amountOfTokensToStake = minAmountToStake.mul(numberOfTickets);
 
         // Transfer tokens from user
         stakingToken.transferFrom(
@@ -205,7 +129,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
         UserStake memory userStake = UserStake({
             amountStaked: amountOfTokensToStake,
             amountOfTicketsGetting: numberOfTickets,
-            unlockingTime: tsr.timeToStake.add(block.timestamp),
+            unlockingTime: minAmountToStake.add(block.timestamp),
             isWithdrawn: false
         });
 
@@ -250,7 +174,6 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
             ticketsToWithdraw = ticketsToWithdraw.add(stake.amountOfTicketsGetting);
 
             stake.isWithdrawn = true;
-
             i++;
         }
 
@@ -276,17 +199,6 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
                 tokenId
             );
         }
-    }
-
-    /**
-     * @notice  Get number of registered champions
-     */
-    function getNumberOfChampions()
-    external
-    view
-    returns (uint256)
-    {
-        return numberOfChampions;
     }
 
     /**
@@ -374,4 +286,18 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
 
         return amountCurrentlyStaking;
     }
+
+    /**
+     * @notice  Function to get all token ids minted for specific champion
+     */
+    function getChampionTokenIds(
+        uint championId
+    )
+    public
+    view
+    returns (uint[] memory)
+    {
+        return championIdToMintedTokensIds[championId];
+    }
+
 }

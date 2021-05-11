@@ -8,6 +8,5 @@ pragma solidity ^0.6.12;
  */
 interface IHordTicketManager {
     function getNumberOfChampions() external view returns (uint256);
-    function createHPoolAndTokenStakingRules(uint tokenId, uint championId, uint256 championNftGen,
-        uint256 purchaseStakeTime, uint256 purchaseStakeAmount) external;
+    function addNewTokenIdForChampion(uint tokenId, uint championId) external;
 }
