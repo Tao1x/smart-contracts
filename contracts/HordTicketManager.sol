@@ -14,6 +14,13 @@ import "./libraries/SafeMath.sol";
  */
 contract HordTicketManager is HordUpgradable, ERC1155Holder {
 
+    //TODO: remove handle from contract alexa will get from handle to id from the backend and search contracts only by id
+    //TODO: remove handle, time to stake, amount to stake from the minting of ticket series
+    //TODO: remove nftGen from the contract
+    //TODO: map champion id to token ids
+    //TODO: delete hpool
+    //TODO: delete tokenstakingrules
+
     using SafeMath for *;
 
     // Mapping champion ID to handle
