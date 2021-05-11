@@ -82,7 +82,7 @@ contract HordTicketFactory is HordUpgradable, ERC1155Pausable {
     function mintNewHPoolNFT(
         uint256 tokenId,
         uint256 initialSupply,
-        uint256 championId,
+        uint256 championId, //TODO: miljan will send as db id
         uint256 championNftGen,
         uint256 purchaseStakeTime,
         uint256 purchaseStakeAmount
@@ -92,7 +92,10 @@ contract HordTicketFactory is HordUpgradable, ERC1155Pausable {
     {
         require(initialSupply <= maxFungibleTicketsPerPool, "MintNewHPoolNFT: Initial supply overflow.");
         require(tokenId == lastMintedTokenId.add(1), "MintNewHPoolNFT: Token ID is wrong.");
-        require(championId < hordTicketManager.getNumberOfChampions(), "MintNewHPoolNFT: Champion ID does not exist.");
+
+        //TODO delete this require
+        require(championId < hordTicketManager.getNumberOfChampions(), "MintNewHPoolNFT: Champion ID does not exist."); //TODO: delete this
+
 
         // Set initial supply
         tokenIdToMintedSupply[tokenId] = initialSupply;

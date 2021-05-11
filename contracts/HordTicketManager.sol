@@ -17,7 +17,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
     using SafeMath for *;
 
     // Mapping champion ID to handle
-    mapping (uint256 => string) championIdToHandle;
+    mapping (uint256 => string) championIdToHandle; //handle can change, ID cannot
     // Number of champions registered
     uint256 internal numberOfChampions;
     // Token being staked
@@ -42,7 +42,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
     mapping (uint256 => TokenStakingRules) public tokenIdToStakingRules;
 
     /// @dev Mapping champion handle to all HPools
-    mapping (string => HPool[]) public championHandleToHPools;
+    mapping (string => HPool[]) public championHandleToHPools;  #we don't yet have hpool structures, only nfts
 
     // Users stake
     struct UserStake {
@@ -76,7 +76,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
     constructor(
         address _hordCongress,
         address _maintainersRegistry,
-        address _stakingToken
+        address _stakingToken   //enable various staking options per nft (e.g. stake 3000 HORD for 10 days or stake 1 HORD LP for 5 days etc..)
     ) public {
         // Set hord congress and maintainers registry
         setCongressAndMaintainers(_hordCongress, _maintainersRegistry);
@@ -111,7 +111,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
     public
     onlyMaintainer
     {
-        require(championId == numberOfChampions.add(1), "RegisterChampion: Champion ID is not in order.");
+        require(championId == numberOfChampions.add(1), "RegisterChampion: Champion ID is not in order."); //TODO: delete unless its absolutely required
         // Take current handle (shouldn't exist)
         string memory currentHandle = championIdToHandle[championId];
         require(keccak256(abi.encodePacked(currentHandle)) == keccak256(abi.encodePacked("")), "RegisterChampion: Champion Handle already exists.");
@@ -122,6 +122,8 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
         numberOfChampions++;
     }
 
+    //TODO: allow to update handle
+
     /**
      * @notice  Create HPools nd token staking rules. Executed every time maintainer mints new series of NFTs
      * @param   tokenId is the ID of the token (representing token class / series)
@@ -130,7 +132,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
      * @param   purchaseStakeTime is time user has to stake tokens in order to claim the NFTs
      * @param   purchaseStakeAmount is amount of tokens user has to stake in order to claim the NFTs
      */
-    function createHPoolAndTokenStakingRules(
+    function createHPoolAndTokenStakingRules(  //TODO we're not creating hpools yet, just the tickets
         uint tokenId,
         uint championId,
         uint256 championNftGen,
@@ -142,7 +144,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
         require(msg.sender == address(hordTicketFactory), "Only Hord Ticket factory can issue a call to this function");
 
         // Create hPool structure
-        HPool memory hPool = HPool(
+        HPool memory hPool = HPool(  //TODO should be hpool_nft structure not hpool structure
             championId,
             tokenId,
             championNftGen
@@ -152,7 +154,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
         string memory championHandle = championIdToHandle[championId];
 
         // Map pool to champion handle
-        championHandleToHPools[championHandle].push(hPool);
+        championHandleToHPools[championHandle].push(hPool);  //TODO put all mappings vs id, and only have one place mapping from handle to id so we can update handle and still everything will work
 
         // Create staking rules for token
         TokenStakingRules memory tokenIdStakingRules = TokenStakingRules(
@@ -233,13 +235,16 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
             UserStake storage stake = userStakesForNft[i];
 
             if(stake.isWithdrawn || stake.unlockingTime > block.timestamp) {
+                i++;
                 continue;
             }
 
-            totalStakeToWithdraw = stake.amountStaked;
-            ticketsToWithdraw = stake.amountOfTicketsGetting;
+            totalStakeToWithdraw = totalStakeToWithdraw.add(stake.amountStaked);
+            ticketsToWithdraw = ticketsToWithdraw.add(stake.amountOfTicketsGetting);
 
             stake.isWithdrawn = true;
+
+            i++;
         }
 
         if(totalStakeToWithdraw > 0 && ticketsToWithdraw > 0) {
