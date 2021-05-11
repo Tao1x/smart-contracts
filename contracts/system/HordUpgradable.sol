@@ -2,8 +2,6 @@
 pragma solidity ^0.6.12;
 
 import "../interfaces/IMaintainersRegistry.sol";
-import "@openzeppelin/contracts/proxy/Initializable.sol";
-
 
 /**
  * HordUpgradables contract.
@@ -11,7 +9,7 @@ import "@openzeppelin/contracts/proxy/Initializable.sol";
  * Date created: 8.5.21.
  * Github: madjarevicn
  */
-contract HordUpgradable is Initializable {
+contract HordUpgradable {
 
     address public hordCongress;
     IMaintainersRegistry public maintainersRegistry;

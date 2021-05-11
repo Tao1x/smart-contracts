@@ -10,8 +10,16 @@
     "initialCongressMembersNames": [
       "Nikola1",
       "Nikola2"
+    ],
+    "minTimeToStake": 3600,
+    "minAmountToStake": 50,
+    "maxFungibleTicketsPerPool": 100,
+    "uri": "https://api.hord.app/metadata/ticket_manager",
+    "maintainers": [
+      "0xDE1C1F83154eF64A8b3AE42b20Ac2DA716d18ABA"
     ]
   },
+
   "mainnet" : {
     "hordTokenName" : "HORD Token",
     "hordTokenSymbol" : "HORD",
@@ -27,6 +35,7 @@
       "2Key delegate"
     ]
   },
+
   "local" : {
     "hordTokenName" : "HORD Token",
     "hordTokenSymbol" : "HORD",
@@ -40,6 +49,14 @@
       "Foundation delegate",
       "Team delegate",
       "2Key delegate"
+    ],
+    "minTimeToStake": 3600,
+    "minAmountToStake": 50,
+    "maxFungibleTicketsPerPool": 100,
+    "uri": "https://api.hord.app/metadata/ticket_manager",
+    "maintainers": [
+      "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
     ]
   }
 }

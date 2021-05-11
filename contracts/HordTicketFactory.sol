@@ -1,7 +1,7 @@
 //"SPDX-License-Identifier: UNLICENSED"
 pragma solidity ^0.6.12;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155Pausable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155PausableUpgradeable.sol";
 import "./system/HordUpgradable.sol";
 import "./interfaces/IHordTicketManager.sol";
 
@@ -11,7 +11,7 @@ import "./interfaces/IHordTicketManager.sol";
  * Date created: 8.5.21.
  * Github: madjarevicn
  */
-contract HordTicketFactory is HordUpgradable, ERC1155Pausable {
+contract HordTicketFactory is HordUpgradable, ERC1155PausableUpgradeable {
 
     // Store always last ID minted
     uint256 public lastMintedTokenId;
@@ -35,16 +35,18 @@ contract HordTicketFactory is HordUpgradable, ERC1155Pausable {
         uint256 supplyAdded
     );
 
-    constructor(
+    function initialize(
         address _hordCongress,
         address _maintainersRegistry,
         address _hordTicketManager,
         uint256 _maxFungibleTicketsPerPool,
         string memory _uri   // https://api.hord.app/metadata/ticket_manager  (for test: https://test-api.hord.app/metadata/ticket_manager)
     )
-    ERC1155(_uri)
     public
+    initializer
     {
+        __ERC1155_init(_uri);
+
         // Set hord congress and maintainers registry contract
         setCongressAndMaintainers(_hordCongress, _maintainersRegistry);
         // Set hord ticket manager contract
