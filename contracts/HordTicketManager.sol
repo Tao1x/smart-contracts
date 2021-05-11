@@ -337,4 +337,29 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
 
         return (amountsStaked, ticketsBought, unlockingTimes, isWithdrawn);
     }
+
+    /**
+     * @notice  Get currently how many tokens is user actively staking
+     */
+    function getCurrentAmountStakedForTokenId(
+        address account,
+        uint tokenId
+    )
+    external
+    view
+    returns (uint256)
+    {
+        UserStake [] memory userStakes = addressToTokenIdToStakes[account][tokenId];
+
+        uint numberOfStakes = userStakes.length;
+        uint amountCurrentlyStaking = 0;
+
+        for(uint i = 0; i < numberOfStakes; i++) {
+            if(userStakes[i].isWithdrawn == false) {
+                amountCurrentlyStaking = amountCurrentlyStaking.add(userStakes[i].amountStaked);
+            }
+        }
+
+        return amountCurrentlyStaking;
+    }
 }
