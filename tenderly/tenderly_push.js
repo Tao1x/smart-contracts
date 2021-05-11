@@ -1,6 +1,6 @@
-const hre = require('hardhat')
+const hre = require('hardhat');
 
-const { getSavedContractAddresses } = require('../scripts/utils')
+const { getSavedContractAddresses } = require('../scripts/utils');
 const branch = require('git-branch');
 const assert = require('assert');
 
@@ -13,14 +13,18 @@ const toCamel = (s) => {
 };
 
 const checksumNetworkAndBranch = (network, branch) => {
-    if (network === 'ropsten') {
+    if(network === 'ropsten') {
         assert.strictEqual(branch ,'develop','Wrong branch');
-    } else if (network === 'ropstenStaging') {
-        assert.strictEqual(branch ,'staging','Wrong branch');
-    } else if (network === 'mainnet') {
-        assert.strictEqual(branch ,'master','Wrong branch');
     }
-}
+    else if(network === 'ropstenStaging') {
+        assert.strictEqual(branch ,'staging','Wrong branch');
+    }
+    else if(network === 'mainnet') {
+        assert.strictEqual(branch ,'master','Wrong branch');
+    } else {
+        new Error('Wrong network configuration')
+    }
+};
 
 async function main() {
     const gitBranch = branch.sync();
@@ -28,13 +32,13 @@ async function main() {
     checksumNetworkAndBranch(hre.network.name, gitBranch);
     const contracts = getSavedContractAddresses()[hre.network.name]
 
-    let contractsToPush = []
+    let contractsToPush = [];
     Object.keys(contracts).forEach(name => {
         contractsToPush.push({
             name: toCamel(name),
             address: contracts[name]
         })
-    })
+    });
     console.log(contractsToPush);
     await hre.tenderly.push(...contractsToPush)
 }
@@ -42,6 +46,6 @@ async function main() {
 main()
     .then(() => process.exit(0))
     .catch(error => {
-        console.error(error)
+        console.error(error);
         process.exit(1)
-    })
+    });
