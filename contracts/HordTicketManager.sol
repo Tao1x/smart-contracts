@@ -15,17 +15,16 @@ import "./libraries/SafeMath.sol";
 contract HordTicketManager is HordUpgradable, ERC1155Holder {
 
     using SafeMath for *;
-
     // Minimal time to stake in order to be eligible for claiming NFT
     uint256 public minTimeToStake;
     // Minimal amount to stake in order to be eligible for claiming NFT
     uint256 public minAmountToStake;
     // Token being staked
-    IERC20 stakingToken;
+    IERC20 public stakingToken;
     // Factory of Hord tickets
     IHordTicketFactory public hordTicketFactory;
     // Mapping championId to tokenIds
-    mapping (uint256 => uint256[]) championIdToMintedTokensIds;
+    mapping (uint256 => uint256[]) internal championIdToMintedTokensIds;
 
     // Users stake
     struct UserStake {
@@ -59,18 +58,23 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
     constructor(
         address _hordCongress,
         address _maintainersRegistry,
-        address _stakingToken   //enable various staking options per nft (e.g. stake 3000 HORD for 10 days or stake 1 HORD LP for 5 days etc..)
+        address _stakingToken,
+        uint256 _minTimeToStake,
+        uint256 _minAmountToStake
     ) public {
         // Set hord congress and maintainers registry
         setCongressAndMaintainers(_hordCongress, _maintainersRegistry);
         // Set staking token
         stakingToken = IERC20(_stakingToken);
+        // Set minimal time to stake tokens
+        minTimeToStake = _minTimeToStake;
+        // Set minimal amount to stake
+        minAmountToStake = _minAmountToStake;
     }
-
 
     /**
      * @notice  Set hord ticket factory contract. After set first time,
-     *  can be changed only by HordCongress
+     *          can be changed only by HordCongress
      * @param _hordTicketFactory is the address of HordTicketFactory contract
      */
     function setHordTicketFactory(address _hordTicketFactory) public {
@@ -82,6 +86,33 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
         hordTicketFactory = IHordTicketFactory(_hordTicketFactory);
     }
 
+    /**
+     * @notice  Set minimal time to stake, callable only by HordCongress
+     * @param   _minimalTimeToStake is minimal amount of time (seconds) user has to stake
+     *          staking token in order to be eligible to claim NFT
+     */
+    function setMinTimeToStake(
+        uint256 _minimalTimeToStake
+    )
+    onlyHordCongress
+    external
+    {
+        minTimeToStake = _minimalTimeToStake;
+    }
+
+    /**
+     * @notice  Set minimal amount to stake, callable only by HordCongress
+     * @param   _minimalAmountToStake is minimal amount of tokens (WEI) user has to stake
+     *          in order to be eligible to claim NFT
+     */
+    function setMinAmountToStake(
+        uint256 _minimalAmountToStake
+    )
+    onlyHordCongress
+    external
+    {
+        minAmountToStake = _minimalAmountToStake;
+    }
 
     /**
      * @notice  Map token id with champion id
@@ -203,6 +234,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
 
     /**
      * @notice  Get number of specific tokens claimed
+     * @param   tokenId is the subject of search
      */
     function getAmountOfTokensClaimed(uint tokenId)
     external
@@ -215,8 +247,11 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
 
     /**
      * @notice  Get amount of tickets reserved for selected tokenId
+     * @param   tokenId is the subject of search
      */
-    function getAmountOfTicketsReserved(uint tokenId)
+    function getAmountOfTicketsReserved(
+        uint tokenId
+    )
     external
     view
     returns (uint256)
@@ -263,7 +298,9 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
     }
 
     /**
-     * @notice  Get currently how many tokens is user actively staking
+     * @notice  Get currently how many tokens is account actively staking
+     * @param   account is address for which stakes are being checked
+     * @param   tokenId is the subject of search for the passed account
      */
     function getCurrentAmountStakedForTokenId(
         address account,
@@ -289,11 +326,12 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
 
     /**
      * @notice  Function to get all token ids minted for specific champion
+     * @param   championId is the db id of the champion
      */
     function getChampionTokenIds(
         uint championId
     )
-    public
+    external
     view
     returns (uint[] memory)
     {
