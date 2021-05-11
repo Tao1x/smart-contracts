@@ -160,7 +160,7 @@ contract HordTicketManager is HordUpgradable, ERC1155Holder {
         UserStake memory userStake = UserStake({
             amountStaked: amountOfTokensToStake,
             amountOfTicketsGetting: numberOfTickets,
-            unlockingTime: minAmountToStake.add(block.timestamp),
+            unlockingTime: minTimeToStake.add(block.timestamp),
             isWithdrawn: false
         });
 
