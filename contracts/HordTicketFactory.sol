@@ -23,6 +23,18 @@ contract HordTicketFactory is HordUpgradable, ERC1155Pausable {
     // Manager contract handling tickets
     IHordTicketManager public hordTicketManager;
 
+
+    event MintedNewNFT (
+        uint256 tokenId,
+        uint256 championId,
+        uint256 initialSupply
+    );
+
+    event AddedNFTSupply(
+        uint256 tokenId,
+        uint256 supplyAdded
+    );
+
     constructor(
         address _hordCongress,
         address _maintainersRegistry,
@@ -96,6 +108,9 @@ contract HordTicketFactory is HordUpgradable, ERC1155Pausable {
         // Mint tokens and store them on contract itself
         _mint(address(hordTicketManager), tokenId, initialSupply, "0x0");
 
+        // Fire event
+        emit MintedNewNFT(tokenId, championId, initialSupply);
+
         // Map champion id with token id
         hordTicketManager.addNewTokenIdForChampion(tokenId, championId);
 
@@ -118,6 +133,9 @@ contract HordTicketFactory is HordUpgradable, ERC1155Pausable {
         require(tokenIdToMintedSupply[tokenId].add(supplyToAdd) <= maxFungibleTicketsPerPool, "More than allowed.");
 
         _mint(address(hordTicketManager), tokenId, supplyToAdd, "0x0");
+
+        // Fire an event
+        emit AddedNFTSupply(tokenId, supplyToAdd);
     }
 
 
