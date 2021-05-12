@@ -1,0 +1,12 @@
+{
+    "local": {
+        "MaintainersRegistry": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+        "HordTicketManager": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+        "HordTicketFactory": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"
+    },
+    "ropsten": {
+        "MaintainersRegistry": "0xAEE26e9af071a40F8AE83EDF5478810d5F1971a6",
+        "HordTicketManager": "0xACF8D0f8D17725b7E3750951f31C631BC310A90e",
+        "HordTicketFactory": "0xd493Ba925F3260522127D42d95673827B87B8748"
+    }
+}
