@@ -7,4 +7,3 @@ artifacts
 .idea
 .env
 yarn.lock
-deployments/*-local.json
