@@ -7,7 +7,10 @@
     "ropsten": {
         "HordCongress": "0x4981B3d3CBa6fE660A4DA390a31b83e8dC28e40D",
         "HordCongressMembersRegistry": "0x9C5539B83Da7e02F965EcFc5df45a85B798D9B0a",
-        "HordToken": "0xF0f8D089136c88D99EAB8De4e84cae347B52AA63"
+        "HordToken": "0xF0f8D089136c88D99EAB8De4e84cae347B52AA63",
+        "MaintainersRegistry": "0x4dEa0f36765F3FF1831f40CF2E49013284bB08C3",
+        "HordTicketManager": "0xDCa26BfF9f0f0D05D9B4dDB97A7B65E8888F9D22",
+        "HordTicketFactory": "0x9B0510A706056A5676bE14738Aa3756D1C7aC2Fd"
     },
     "local": {
         "hordCongress": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
