@@ -1,5 +1,5 @@
 const hre = require("hardhat");
-const { hexify, toHordDenomination } = require('../test/setup');
+const { toHordDenomination } = require('../test/setup');
 const { getSavedContractAddresses, saveContractAddress, saveContractProxies, getSavedContractProxies } = require('./utils');
 let c = require('../deployments/deploymentConfig.json');
 
