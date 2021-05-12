@@ -9,8 +9,6 @@ async function main() {
     const config = c[hre.network.name];
     const contracts = getSavedContractAddresses()[hre.network.name];
 
-    console.log(config);
-
     const MaintainersRegistry = await ethers.getContractFactory('MaintainersRegistry')
     const maintainersRegistry = await upgrades.deployProxy(MaintainersRegistry, [config.maintainers, contracts["HordCongress"]]);
     await maintainersRegistry.deployed()
@@ -48,7 +46,6 @@ async function main() {
 
     await hordTicketManager.setHordTicketFactory(hordTicketFactory.address);
     console.log('hordTicketManager.setHordTicketFactory(', hordTicketFactory.address, ') successfully set.');
-
 
     let admin = await upgrades.admin.getInstance();
 
