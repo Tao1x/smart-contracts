@@ -1,6 +1,6 @@
 {
     "ropsten": {
-        "version": "0.0.1-develop",
+        "version": "0.0.2-develop",
         "HordTicketManager": [
                 {
                     "anonymous": false,
