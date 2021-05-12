@@ -11,7 +11,7 @@
       "Nikola1",
       "Nikola2"
     ],
-    "minTimeToStake": 10800,
+    "minTimeToStake": 1800,
     "minAmountToStake": 1000,
     "maxFungibleTicketsPerPool": 100,
     "uri": "https://test-api.hord.app/metadata/ticket_manager",
