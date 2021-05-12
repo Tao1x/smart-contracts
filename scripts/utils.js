@@ -35,6 +35,23 @@ function saveContractProxies(network, contract, address) {
     fs.writeFileSync(path.join(__dirname, `../deployments/contract-proxies.json`), JSON.stringify(addrs, null, '    '))
 }
 
+function getSavedContractABI() {
+    let json
+    try {
+        json = fs.readFileSync(path.join(__dirname, `../deployments/contract-abis.json`))
+    } catch (err) {
+        json = '{}'
+    }
+    return JSON.parse(json)
+}
+
+function saveContractAbi(network, contract, abi) {
+    const abis = getSavedContractABI()
+    abis[network] = abis[network] || {}
+    abis[network][contract] = abi
+    fs.writeFileSync(path.join(__dirname, `../deployments/contract-abis.json`), JSON.stringify(abis, null, '    '))
+}
+
 
 function getDeploymentBlockchain() {
     let json
@@ -60,5 +77,7 @@ module.exports = {
     getDeploymentBlockchain,
     saveDeploymentBlockchain,
     getSavedContractProxies,
-    saveContractProxies
+    saveContractProxies,
+    getSavedContractABI,
+    saveContractAbi
 }
