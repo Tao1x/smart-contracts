@@ -10,7 +10,7 @@ const hre = require("hardhat");
 let hordCongress, hordCongressAddress, accounts, owner, ownerAddr, maintainer, maintainerAddr,
     user, userAddress, config,
     hordToken, maintainersRegistryContract, ticketFactoryContract, ticketManagerContract,
-    championId, supplyToMint, tx, tokenId, lastAddedId
+    championId, supplyToMint, tx, tokenId, lastAddedId, ticketsToBuy, reservedTickets
 
 async function setupAccounts () {
     config = configuration[hre.network.name];
@@ -116,6 +116,12 @@ describe('HordTicketFactory & HordTicketManager Test', () => {
         });
     });
 
+    describe('Adding token supply', async() => {
+       it('should add token supply within allowed range', async () => {
+
+       });
+    });
+
     describe('Minting from address which is not maintainer', async() => {
        it('should not be able to mint from non-maintainer user', async() => {
            ticketFactoryContract = ticketFactoryContract.connect(user);
@@ -146,4 +152,58 @@ describe('HordTicketFactory & HordTicketManager Test', () => {
            ).to.be.true
        });
     });
+
+    describe('Staking HORD in order to get tickets', async() => {
+        it('should have some hord tokens in order to stake', async() => {
+            hordToken = hordToken.connect(owner);
+            await hordToken.transfer(userAddress, toHordDenomination(3500));
+
+            let balance = await hordToken.balanceOf(userAddress);
+            expect(balance.toString()).to.be.equal(toHordDenomination(3500));
+        });
+
+        it('should approve HordTicketManager to take HORD', async () => {
+            hordToken = hordToken.connect(user);
+            let balance = await hordToken.balanceOf(userAddress);
+            await hordToken.approve(ticketManagerContract.address, balance);
+        });
+
+        it('should check accounting state before deposit', async() => {
+            tokenId = await ticketFactoryContract.lastMintedTokenId();
+            reservedTickets = await ticketManagerContract.getAmountOfTicketsReserved(tokenId);
+            expect(parseInt(reservedTickets,10)).to.equal(0);
+        });
+
+        it('should try to buy 3 tickets', async() => {
+            ticketsToBuy = 3;
+            ticketManagerContract = ticketManagerContract.connect(user);
+            tokenId = await ticketFactoryContract.lastMintedTokenId();
+            tx = await awaitTx(ticketManagerContract.stakeAndReserveNFTs(tokenId, ticketsToBuy));
+        });
+
+        it('should NOT be able to buy more tickets than user can afford', async() => {
+            ticketManagerContract = ticketManagerContract.connect(user);
+            tokenId = await ticketFactoryContract.lastMintedTokenId();
+            expect(
+                await isEthException(ticketManagerContract.stakeAndReserveNFTs(tokenId, 2))
+            ).to.be.true
+        });
+
+        it('should check event TokensStaked', async() => {
+            expect(tx.events.length).to.equal(3)
+            expect(tx.events[2].event).to.equal('TokensStaked');
+            expect(tx.events[2].args.user).to.equal(userAddress, "User address us not matching")
+            expect(tx.events[2].args.amountStaked).to.equal(toHordDenomination(ticketsToBuy * config['minAmountToStake']));
+            expect(parseInt(tx.events[2].args.inFavorOfTokenId)).to.equal(tokenId);
+            expect(parseInt(tx.events[2].args.numberOfTicketsReserved)).to.equal(ticketsToBuy);
+        });
+
+        it('should check number of reserved tickets', async() => {
+            reservedTickets = await ticketManagerContract.getAmountOfTicketsReserved(tokenId);
+            expect(parseInt(reservedTickets, 10)).to.equal(ticketsToBuy);
+        });
+
+    });
+
+
 });

@@ -70,7 +70,7 @@
       "2Key delegate"
     ],
     "minTimeToStake": 3600,
-    "minAmountToStake": 50,
+    "minAmountToStake": 1000,
     "maxFungibleTicketsPerPool": 100,
     "uri": "https://api.hord.app/metadata/ticket_manager",
     "maintainers": [
