@@ -78,7 +78,7 @@ async function setupContracts () {
     await hordTicketManager.setHordTicketFactory(hordTicketFactory.address);
 }
 
-describe('NFTs', () => {
+describe('HordTicketFactory & HordTicketManager Test', () => {
     before('setup contracts', async () => {
         await setupAccounts();
         await setupContracts()
