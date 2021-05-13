@@ -2,7 +2,7 @@ const { ethers, expect, isEthException, awaitTx, toHordDenomination } = require(
 const config = require('../../deployments/deploymentConfig.json');
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
-const INITIAL_SUPPLY = toHordDenomination(config.hordTotalSupply)
+const INITIAL_SUPPLY = toHordDenomination(config['local'].hordTotalSupply)
 const transferAmount = toHordDenomination(10)
 const unitTokenAmount = toHordDenomination(1)
 
@@ -25,9 +25,9 @@ async function setupContractAndAccounts () {
 
   const Hord = await hre.ethers.getContractFactory("HordToken");
   hordToken = await Hord.deploy(
-      config.hordTokenName,
-      config.hordTokenSymbol,
-      toHordDenomination(config.hordTotalSupply.toString()),
+      config['local'].hordTokenName,
+      config['local'].hordTokenSymbol,
+      toHordDenomination(config['local'].hordTotalSupply.toString()),
       ownerAddr
   );
   await hordToken.deployed()

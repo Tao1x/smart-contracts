@@ -1,7 +1,8 @@
 const hre = require("hardhat");
 const { hexify, toHordDenomination } = require('../test/setup');
-const { getSavedContractAddresses, saveContractAddress, getSavedContractBytecodes, saveContractBytecode } = require('./utils')
+const { saveContractAddress } = require('./utils')
 let c = require('../deployments/deploymentConfig.json');
+
 async function main() {
   await hre.run('compile');
 
@@ -11,7 +12,7 @@ async function main() {
   const hordCongress = await HordCongress.deploy();
   await hordCongress.deployed();
   console.log("HordCongress contract deployed to:", hordCongress.address);
-  saveContractAddress(hre.network.name, 'hordCongress', hordCongress.address);
+  saveContractAddress(hre.network.name, 'HordCongress', hordCongress.address);
 
   const HordCongressMembersRegistry = await hre.ethers.getContractFactory("HordCongressMembersRegistry");
   const hordCongressMembersRegistry = await HordCongressMembersRegistry.deploy(
@@ -21,7 +22,7 @@ async function main() {
   );
   await hordCongressMembersRegistry.deployed();
   console.log("HordCongressMembersRegistry contract deployed to:", hordCongressMembersRegistry.address);
-  saveContractAddress(hre.network.name, 'hordCongressMembersRegistry', hordCongressMembersRegistry.address);
+  saveContractAddress(hre.network.name, 'HordCongressMembersRegistry', hordCongressMembersRegistry.address);
 
 
   const HordToken = await hre.ethers.getContractFactory("HordToken");
@@ -33,7 +34,7 @@ async function main() {
   );
   await hord.deployed();
   console.log("Hord token deployed to:", hord.address);
-  saveContractAddress(hre.network.name, 'hordToken', hord.address);
+  saveContractAddress(hre.network.name, 'HordToken', hord.address);
 
   await hordCongress.setMembersRegistry(hordCongressMembersRegistry.address);
   console.log('HordCongress.setMembersRegistry(',hordCongressMembersRegistry.address,') set successfully.');

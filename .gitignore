@@ -7,4 +7,5 @@ artifacts
 .idea
 .env
 yarn.lock
-deployments/*-local.json
+.openzeppelin/unknown-*.json
+.openzeppelin/local-*.json

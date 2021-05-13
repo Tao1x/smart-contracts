@@ -1,17 +1,21 @@
-# Smart Contracts
+## Hord.app Smart Contracts
 
-Implementation of hord.fund protocol 
+<img src="./favicon.png" width="100" style="float: left;">
 
+_HORD enables crypto champions to tokenize and monetize their influence, and empowers crypto lovers to evolve from following news and tips to capitalizing on information flow._
+
+- Website: [https://hord.app][Official website]
+- Community: [https://t.me/hord_app][Official telegram community]
 
 ### Developer instructions
+
 #### Instal dependencies
 `yarn install`
 
 #### Create .env file and make sure it's having following information:
 ```
 PK=YOUR_PRIVATE_KEY 
-USERNAME=HORD
-PROJECT=HORD_FUND
+USERNAME=2key
 ```
 
 #### Compile code
@@ -25,7 +29,10 @@ PROJECT=HORD_FUND
 #### Flatten contracts
 - `npx hardhat flatten` (Flattens and prints contracts and their dependencies)
 
-
 #### Deployed addresses and bytecodes
-All deployed addresses and bytecodes can be found inside `deployments/` folder.
+All deployed addresses and bytecodes can be found inside `deployments/contract-addresses.json` file.
 
+
+[Official website]: https://hord.app
+
+[Official telegram community]: https://t.me/hord_app

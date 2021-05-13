@@ -2,9 +2,11 @@ const {
     address,
     encodeParameters
 } = require('../ethereum');
-const config = require('../../deployments/deploymentConfig.json');
+const hre = require("hardhat");
+let configuration = require('../../deployments/deploymentConfig.json');
 const { ethers, expect, isEthException, awaitTx, toHordDenomination, hexify } = require('../setup')
 
+let config;
 let hordCongress, hordCongressMembersRegistry, hordToken, accounts, owner, ownerAddr, anotherAccount, anotherAccountAddr, r
 let nonCongressAcc, nonCongressAccAddr
 let initialMembers, initialNames
@@ -12,6 +14,8 @@ let tokensToTransfer = 1000;
 let targets, values, signatures, calldatas, description, proposalId, numberOfProposals
 
 async function setupContractAndAccounts () {
+    config = configuration[hre.network.name];
+
     accounts = await ethers.getSigners()
     owner = accounts[0]
     ownerAddr = await owner.getAddress()
