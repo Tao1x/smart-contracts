@@ -3,14 +3,15 @@ const {
     encodeParameters
 } = require('./ethereum');
 const configuration = require('../deployments/deploymentConfig.json');
-const { ethers, expect, isEthException, awaitTx, toHordDenomination, hexify } = require('./setup')
+const { ethers, expect, isEthException, awaitTx, toHordDenomination, waitForSomeTime } = require('./setup')
 const hre = require("hardhat");
 
 
 let hordCongress, hordCongressAddress, accounts, owner, ownerAddr, maintainer, maintainerAddr,
     user, userAddress, config,
     hordToken, maintainersRegistryContract, ticketFactoryContract, ticketManagerContract,
-    championId, supplyToMint, tx, tokenId, lastAddedId, ticketsToBuy, reservedTickets
+    championId, supplyToMint, tx, tokenId, lastAddedId, ticketsToBuy, reservedTickets,
+    hordBalance, ticketsBalance, amountStaked
 
 async function setupAccounts () {
     config = configuration[hre.network.name];
@@ -198,12 +199,52 @@ describe('HordTicketFactory & HordTicketManager Test', () => {
             expect(parseInt(tx.events[2].args.numberOfTicketsReserved)).to.equal(ticketsToBuy);
         });
 
+        it('should check amount user is actively staking', async() => {
+            amountStaked = await ticketManagerContract.getCurrentAmountStakedForTokenId(userAddress, tokenId);
+            expect(amountStaked).to.equal(toHordDenomination(ticketsToBuy * config['minAmountToStake']));
+        });
+
         it('should check number of reserved tickets', async() => {
             reservedTickets = await ticketManagerContract.getAmountOfTicketsReserved(tokenId);
             expect(parseInt(reservedTickets, 10)).to.equal(ticketsToBuy);
         });
-
     });
+
+    describe('Claiming tickets', async() => {
+        it('should NOT BE ABLE claim NFT tickets and withdraw amount staked', async() => {
+            ticketManagerContract = ticketManagerContract.connect(user);
+            tx = await awaitTx(ticketManagerContract.claimNFTs(tokenId));
+            expect(tx.events.length).to.equal(0);
+        });
+
+        it('should advance time so user can claim NFTs', async() => {
+            await waitForSomeTime(owner.provider, config["minTimeToStake"]);
+        });
+
+        it('should get balance of tickets and hord before withdrawal', async() => {
+            hordBalance = await hordToken.balanceOf(userAddress);
+            ticketsBalance = await ticketFactoryContract.balanceOf(userAddress, tokenId);
+            amountStaked = await ticketManagerContract.getCurrentAmountStakedForTokenId(userAddress, tokenId);
+            expect(ticketsBalance).to.equal(0);
+        });
+
+        it('should claim NFT tickets and withdraw amount staked', async() => {
+            ticketManagerContract = ticketManagerContract.connect(user);
+            tx = await awaitTx(ticketManagerContract.claimNFTs(tokenId));
+            expect(tx.events.length).to.equal(3);
+            expect(tx.events[2].event).to.equal('NFTsClaimed');
+        });
+
+        it('should check that user withdrawn amount staked', async() => {
+            let balanceAfterWithdraw = await hordToken.balanceOf(userAddress);
+            expect(hordBalance.add(amountStaked)).equal(balanceAfterWithdraw);
+        });
+
+        it('should check that user received NFTs', async() => {
+           let balanceNFT = await ticketFactoryContract.balanceOf(userAddress, tokenId);
+           expect(balanceNFT).to.equal(ticketsBalance + ticketsToBuy);
+        });
+    })
 
 
 });
