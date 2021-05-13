@@ -72,6 +72,7 @@ async function setupContracts () {
         ]
     );
     await hordTicketFactory.deployed()
+
     ticketFactoryContract = hordTicketFactory.connect(maintainer);
 
     supplyToMint = 20;
@@ -85,8 +86,29 @@ describe('HordTicketFactory & HordTicketManager Test', () => {
         await setupContracts()
     });
 
+    describe('Pause and Unpause contract', async() => {
+        it('should NOT be able to pause contract from NON-congress address', async() => {
+           ticketFactoryContract = ticketFactoryContract.connect(user);
+            expect(
+                await isEthException(ticketFactoryContract.pause())
+            ).to.be.true
+        });
+
+        it('should pause contract from congress', async() => {
+            ticketFactoryContract = ticketFactoryContract.connect(hordCongress);
+            await ticketFactoryContract.pause();
+            expect(await ticketFactoryContract.paused()).to.be.true;
+        });
+
+        it('should unpause contract from congress', async() => {
+            await ticketFactoryContract.unpause();
+            expect(await ticketFactoryContract.paused()).to.be.false;
+        });
+    });
+
     describe('Minting from maintainer', async() => {
         it('should mint token', async() => {
+            ticketFactoryContract = ticketFactoryContract.connect(maintainer);
             lastAddedId = await ticketFactoryContract.lastMintedTokenId();
             tokenId = parseInt(lastAddedId,10) + 1;
             championId = 1;
