@@ -138,10 +138,11 @@ describe('NFTs', () => {
 
        it('should not be able to mint more than max supply', async() => {
            ticketFactoryContract = ticketFactoryContract.connect(maintainer);
-           tokenId = tokenId + 1;
+           lastAddedId = await ticketFactoryContract.lastMintedTokenId();
+           tokenId = parseInt(lastAddedId,10) + 1;
            let _supplyToMint = config["maxFungibleTicketsPerPool"] + 1;
            expect(
-               await isEthException(ticketFactoryContract.mintNewHPoolNFT(tokenId, supplyToMint, championId))
+               await isEthException(ticketFactoryContract.mintNewHPoolNFT(tokenId, _supplyToMint, championId))
            ).to.be.true
        });
     });
