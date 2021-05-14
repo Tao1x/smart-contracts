@@ -1,6 +1,6 @@
 const hre = require('hardhat');
 
-const { getSavedContractAddresses } = require('../scripts/utils');
+const { getSavedContractAddresses, getSavedContractProxies } = require('../scripts/utils');
 const branch = require('git-branch');
 const assert = require('assert');
 
@@ -30,15 +30,27 @@ async function main() {
     const gitBranch = branch.sync();
 
     checksumNetworkAndBranch(hre.network.name, gitBranch);
-    const contracts = getSavedContractAddresses()[hre.network.name]
 
-    let contractsToPush = [];
+    const contracts = getSavedContractAddresses()[hre.network.name]
+    const proxies = getSavedContractProxies()[hre.network.name];
+
+    const contractsToPush = [];
+    // Implementations
     Object.keys(contracts).forEach(name => {
         contractsToPush.push({
             name: toCamel(name),
             address: contracts[name]
         })
     });
+
+    // Proxies
+    Object.keys(proxies).forEach(name => {
+        contractsToPush.push({
+            name: 'AdminUpgradeabilityProxy',
+            address: proxies[name]
+        })
+    })
+
     console.log(contractsToPush);
     await hre.tenderly.push(...contractsToPush)
 }
