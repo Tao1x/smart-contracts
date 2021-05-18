@@ -9,7 +9,6 @@ $ node encodeParams.js 'address,uint256' '0xf3B39c28bF4c5c13346eEFa8F90e88B78A61
 ```
 
 ---
----
 
 ### Congress submit proposal and vote
 
@@ -27,6 +26,7 @@ function propose(
         string memory description
     )
 ```
+<br/>
 
 - _Step 4.1:_ targets is array of destination targets (where transaction should go)
 - _Step 4.2:_ values are ETH values for the corresponding targets if there's any payable method called
@@ -34,6 +34,7 @@ function propose(
 - _Step 4.4:_ calldatas is the array of calldatas got from Step 2.
 - _Step 4.5:_ description is array of descriptions what is done in the actions
 
+<br/>
 
 - _**Step 5:**_ After method propose is called (best through etherscan) members can vote
 - _**Step 6:**_ During propose method event is emitted with proposalId which is used for voting
