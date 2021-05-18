@@ -41,3 +41,4 @@ function propose(
 - _**Step 7:**_ Members can vote
 - _**Step 8:**_ Once quorum is reached any member can execute proposal
 
+---
