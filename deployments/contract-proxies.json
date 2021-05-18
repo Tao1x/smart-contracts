@@ -8,5 +8,10 @@
         "MaintainersRegistry": "0x97d938Cfd462bA4b322cc76bf0A94B83Bfce628C",
         "HordTicketManager": "0x9cF8945B671950FE2414f26c6B73cCeE593FcaC4",
         "HordTicketFactory": "0x23bB7384a3e74AC0D0abe4bB0A5BC9dEeE18dc06"
+    },
+    "ropstenStaging": {
+        "MaintainersRegistry": "0xc779A9fD46d83d7873f811105243505bAE374CD3",
+        "HordTicketManager": "0x8B13b4d6ed229563f9aB4eB27e9eA94e7b19bc3f",
+        "HordTicketFactory": "0x42fF7689F84033483FDd52d3659C0C9f2627AF8e"
     }
 }
