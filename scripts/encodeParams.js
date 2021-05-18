@@ -4,7 +4,9 @@ const {
 
 
 async function main() {
+    // Comma separated types
     let types = process.argv[2];
+    // Comma separated values
     let values = process.argv[3];
     console.log('Encoded: ',encodeParameters(types.split(','), values.split(',')));
 }
